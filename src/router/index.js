@@ -3,6 +3,10 @@ import AdminLayout from '../layouts/AdminLayout.vue'
 import WorkerLayout from '../layouts/workerLayout.vue'
 import { useAuthStore } from '../stores/auth'
 
+// 로그인 화면 활성화/비활성화 설정
+// true: 로그인 화면 표시, false: 로그인 건너뛰고 바로 admin 페이지로 이동
+const LOGIN_ENABLED = false
+
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -12,6 +16,13 @@ const router = createRouter({
       name: 'login',
       component: () => import('../pages/auth/LoginView.vue'),
       meta: { requiresAuth: false },
+      beforeEnter: (_to, _from, next) => {
+        if (!LOGIN_ENABLED) {
+          next('/admin/adminMain')
+        } else {
+          next()
+        }
+      },
     },
     // 관리자 페이지  (사이드바 레이아웃 적용)
     {
@@ -102,6 +113,12 @@ const router = createRouter({
 
 //  인증 및 역할 검증
 router.beforeEach((to, _from, next) => {
+  // 로그인이 비활성화된 경우 인증 검사 건너뛰기
+  if (!LOGIN_ENABLED) {
+    next()
+    return
+  }
+
   const authStore = useAuthStore()
   const isAuthenticated = authStore.isAuthenticated
   const userRole = authStore.userRole
