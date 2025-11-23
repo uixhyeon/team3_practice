@@ -1,45 +1,30 @@
 <script setup>
-import Header from "./components/Header.vue";
-import Footer from "./components/Footer.vue";
-import { ref, onMounted, onUnmounted } from "vue";
+import { onMounted } from 'vue'
+import { RouterView } from 'vue-router'
+import { useDarkMode } from './composables/useDarkMode'
 
-// 💚 전역 Alert 상태
-const showAlert = ref(false);
-const alertMessage = ref("");
-
-// 전역 이벤트 리스너
-function handleGlobalAlert(e) {
-  alertMessage.value = e.detail;
-  showAlert.value = true;
-}
+// 다크모드 초기화
+const { initDarkMode } = useDarkMode()
 
 onMounted(() => {
-  window.addEventListener("show-alert", handleGlobalAlert);
-});
-onUnmounted(() => {
-  window.removeEventListener("show-alert", handleGlobalAlert);
-});
+  initDarkMode()
+})
 </script>
 
 <template>
-  <div class="wrap">
-    <Header />
-
-    <main>
-      <router-view></router-view>
-    </main>
-
-    <Footer />
-
-    <!-- 💚 전역 알림 모달 -->
-    <AlertModal
-      :show="showAlert"
-      :message="alertMessage"
-      @close="showAlert = false"
-    />
-  </div>
+  <!-- 라우터가 레이아웃을 결정 -->
+  <RouterView />
 </template>
 
-<style scoped>
-/* 필요 시 wrap padding 조정 가능 */
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+}
 </style>
