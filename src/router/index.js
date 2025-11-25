@@ -81,7 +81,7 @@ const router = createRouter({
         },
         {
           path: 'jobs',
-          name: 'MobileJobs',
+          name: 'WorkerJobs',
           component: () => import('../pages/worker/WorkerMain.vue'),
           meta: { title: '작업자', role: 'worker' },
         },
