@@ -76,6 +76,10 @@ const router = createRouter({
       meta: { requiresAuth: true, role: 'worker' },
       children: [
         {
+          path: '',
+          redirect: 'jobs',
+        },
+        {
           path: 'jobs',
           name: 'MobileJobs',
           component: () => import('../pages/worker/Jobs.vue'),
