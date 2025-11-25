@@ -82,7 +82,7 @@ const router = createRouter({
         {
           path: 'jobs',
           name: 'MobileJobs',
-          component: () => import('../pages/worker/Jobs.vue'),
+          component: () => import('../pages/worker/WorkerMain.vue'),
           meta: { title: '작업자', role: 'worker' },
         },
       ],
