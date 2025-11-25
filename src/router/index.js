@@ -85,18 +85,6 @@ const router = createRouter({
           component: () => import('../pages/worker/Jobs.vue'),
           meta: { title: '작업자', role: 'worker' },
         },
-        {
-          path: 'calendar',
-          name: 'MobileCalendar',
-          component: () => import('../pages/worker/Calendar.vue'),
-          meta: { title: '작업자 일정', role: 'worker' },
-        },
-        {
-          path: 'payment',
-          name: 'MobilePayment',
-          component: () => import('../pages/worker/Payment.vue'),
-          meta: { title: '결제', role: 'worker' },
-        },
       ],
     },
 

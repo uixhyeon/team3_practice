@@ -42,72 +42,13 @@
     </header>
     <!-- 메인 -->
     <main
-      class="bg-gray-100 overflow-y-auto overflow-x-hidden w-full max-h-[calc(100vh-68px)] pt-[68px] dark:bg-gray-900"
+      class="bg-gray-100 overflow-y-auto overflow-x-hidden w-full h-full pt-[68px] dark:bg-gray-900"
     >
       <router-view></router-view>
     </main>
 
     <!-- 프로필 모달 -->
     <WorkerProfile v-if="showProfile" @close="showProfile = false" />
-    <!-- 하단 탭바 -->
-    <nav
-      class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white/95 dark:bg-gray-900/95 backdrop-blur border-t border-gray-200 dark:border-gray-700 h-[68px] z-10"
-    >
-      <div class="h-full grid grid-cols-3">
-        <router-link
-          class="relative flex flex-col items-center justify-center text-xs"
-          :to="{ name: 'MobileJobs' }"
-          :class="
-            $route.name === 'MobileJobs'
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-gray-500 dark:text-gray-400'
-          "
-        >
-          <span
-            class="w-7 h-7 rounded-xl bg-blue-50 dark:bg-blue-900/50 flex items-center justify-center shadow-inner"
-            >📋</span
-          >
-          작업목록
-          <span
-            v-if="$route.name === 'MobileJobs'"
-            class="absolute -top-1 w-12 h-1 rounded-full bg-blue-600/80 dark:bg-blue-400/80"
-          ></span>
-        </router-link>
-        <router-link
-          class="relative flex flex-col items-center justify-center text-xs"
-          :to="{ name: 'MobileCalendar' }"
-          :class="
-            $route.name === 'MobileCalendar'
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-gray-500 dark:text-gray-400'
-          "
-          ><span
-            class="w-7 h-7 rounded-xl bg-blue-50 dark:bg-blue-900/50 flex items-center justify-center shadow-inner"
-            >🗓️</span
-          >캘린더<span
-            v-if="$route.name === 'MobileCalendar'"
-            class="absolute -top-1 w-12 h-1 rounded-full bg-blue-600/80 dark:bg-blue-400/80"
-          ></span
-        ></router-link>
-        <router-link
-          class="relative flex flex-col items-center justify-center text-xs"
-          :to="{ name: 'MobilePayment' }"
-          :class="
-            $route.name === 'MobilePayment'
-              ? 'text-blue-600 dark:text-blue-400'
-              : 'text-gray-500 dark:text-gray-400'
-          "
-        >
-          <span
-            class="w-7 h-7 rounded-xl bg-green-50 dark:bg-green-900/50 flex items-center justify-center shadow-inner"
-            >💰</span
-          >정산내역<span
-            v-if="$route.name === 'MobilePayment'"
-            class="absolute -top-1 w-12 h-1 rounded-full bg-blue-600/80 dark:bg-blue-400/80"
-          ></span
-        ></router-link>
-      </div>
-    </nav>
   </div>
 </template>
 <script setup>
