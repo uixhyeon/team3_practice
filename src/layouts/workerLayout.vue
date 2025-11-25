@@ -4,41 +4,51 @@
   >
     <!-- 헤더 -->
     <header
-      class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-20 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700"
+      class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-20"
+      style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)"
     >
       <div class="flex items-center gap-3 justify-between p-4">
-        <div
-          class="w-10 h-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold"
+        <!-- 왼쪽: 아이콘 + 이름 (클릭 시 홈으로 이동) -->
+        <button
+          @click="goToHome"
+          class="flex items-center gap-3 hover:opacity-80 transition-opacity cursor-pointer"
         >
-          기
-        </div>
-
-        <div>
-          <p class="text-sm text-gray-500 dark:text-gray-400">
-            안녕하세요, {{ authStore.user?.name || '기사' }}님
-          </p>
-          <h1 class="text-lg font-semibold text-gray-900 dark:text-white">
-            오늘도 안전하고 깔끔하게!
-          </h1>
-          <div class="text-sm text-gray-500 dark:text-gray-400">
-            {{ todayText }}
+          <div class="flex items-center gap-1">
+            <div class="w-3 h-3 bg-blue-400 rounded-sm"></div>
+            <div class="w-3 h-3 bg-cyan-300 rounded-sm"></div>
           </div>
-          <!-- 로그아웃 버튼 (제일 우측) -->
-        </div>
-        <button @click="confirmLogout" class="flex items-center gap-2" :title="'로그아웃'">
-          <span class="text-sm">🚪</span>
-          <span class="text-sm text-gray-500 dark:text-gray-400">로그아웃</span>
+          <span class="text-white font-medium"
+            >{{ authStore.user?.name || "김운전" }}님</span
+          >
         </button>
-        <Weather />
-        <DarkModeToggle />
+
+        <!-- 오른쪽: 날씨 + 설정 버튼 -->
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-2 text-white text-sm">
+            <div class="flex items-center gap-1">
+              <span>☁️</span>
+              <span>강수 19%</span>
+            </div>
+            <span>8°C/12°C</span>
+          </div>
+          <button
+            @click="showProfile = true"
+            class="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
+          >
+            <i class="fi fi-rr-settings text-xl"></i>
+          </button>
+        </div>
       </div>
     </header>
     <!-- 메인 -->
     <main
-      class="bg-gray-100 overflow-y-auto overflow-x-hidden w-full max-h-[calc(100vh-68px)] pt-[100px] dark:bg-gray-900"
+      class="bg-gray-100 overflow-y-auto overflow-x-hidden w-full max-h-[calc(100vh-68px)] pt-[68px] dark:bg-gray-900"
     >
       <router-view></router-view>
     </main>
+
+    <!-- 프로필 모달 -->
+    <WorkerProfile v-if="showProfile" @close="showProfile = false" />
     <!-- 하단 탭바 -->
     <nav
       class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white/95 dark:bg-gray-900/95 backdrop-blur border-t border-gray-200 dark:border-gray-700 h-[68px] z-10"
@@ -101,34 +111,40 @@
   </div>
 </template>
 <script setup>
-import DarkModeToggle from '@/components/common/DarkModeToggle.vue'
-import ApiDebugPanel from '@/components/dev/ApiDebugPanel.vue'
-import { ref, computed } from 'vue'
-import { useAuthStore } from '@/stores/auth'
-import { RouterLink, RouterView, useRoute, useRouter } from 'vue-router'
+import DarkModeToggle from "@/components/common/DarkModeToggle.vue";
+import ApiDebugPanel from "@/components/dev/ApiDebugPanel.vue";
+import { ref, computed } from "vue";
+import { useAuthStore } from "@/stores/auth";
+import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
+import WorkerProfile from "@/components/worker/WorkerProfile.vue";
 
-const router = useRouter()
-const route = useRoute()
-const authStore = useAuthStore()
-const isProfileMenuOpen = ref(false)
+const router = useRouter();
+const route = useRoute();
+const authStore = useAuthStore();
+const isProfileMenuOpen = ref(false);
+const showProfile = ref(false);
 
 const confirmLogout = () => {
-  const isConfirmed = window.confirm('정말 로그아웃하시겠습니까?')
+  const isConfirmed = window.confirm("정말 로그아웃하시겠습니까?");
   if (isConfirmed) {
-    handleLogout()
+    handleLogout();
   }
-}
+};
 
 const handleLogout = () => {
-  isProfileMenuOpen.value = false
-  authStore.logout()
-  router.push('/login')
-}
+  isProfileMenuOpen.value = false;
+  authStore.logout();
+  router.push("/login");
+};
 
-const todayText = new Date().toLocaleDateString('ko-KR', {
-  weekday: 'long',
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-})
+const goToHome = () => {
+  router.push({ name: "MobileJobs" });
+};
+
+const todayText = new Date().toLocaleDateString("ko-KR", {
+  weekday: "long",
+  year: "numeric",
+  month: "long",
+  day: "numeric",
+});
 </script>

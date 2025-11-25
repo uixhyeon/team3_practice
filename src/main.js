@@ -1,5 +1,6 @@
 import './assets/main.css'
 import '@flaticon/flaticon-uicons/css/bold/rounded.css'
+import '@flaticon/flaticon-uicons/css/regular/rounded.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
