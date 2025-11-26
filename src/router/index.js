@@ -78,12 +78,9 @@ const router = createRouter({
       children: [
         {
           path: "",
-          redirect: "/worker/workerMain/work",
-        },
-        {
-          path: "work",
           name: "WorkerWork",
           component: () => import("../pages/worker/WorkerMain.vue"),
+          alias: "work", // 기존 /work 경로도 호환
           meta: { title: "작업자", role: "worker" },
         },
         {
@@ -124,7 +121,7 @@ const router = createRouter({
         }
         return authStore.userRole === "admin"
           ? "/admin/adminMain"
-          : "/worker/workerMain/work";
+          : "/worker/workerMain";
       },
     },
   ],
