@@ -7,7 +7,8 @@
       class="fixed top-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-20"
       style="background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)"
     >
-      <div class="flex items-center gap-3 justify-between p-4">
+      <!-- 첫 번째 줄: 이름과 버튼들 -->
+      <div class="flex items-center gap-3 justify-between p-4 pb-2">
         <!-- 왼쪽: 아이콘 + 이름 (클릭 시 홈으로 이동) -->
         <button
           @click="goToHome"
@@ -22,17 +23,11 @@
           >
         </button>
 
-        <!-- 오른쪽: 날씨 + 설정 버튼 -->
-        <div class="flex items-center gap-3">
-          <div class="flex items-center gap-2 text-white text-sm">
-            <div class="flex items-center gap-1">
-              <span>☁️</span>
-              <span>강수 19%</span>
-            </div>
-            <span>8°C/12°C</span>
-          </div>
+        <!-- 오른쪽: 다크모드 토글 + 설정 버튼 -->
+        <div class="flex items-center gap-2">
+          <DarkModeToggle />
           <button
-            @click="showProfile = true"
+            @click="goToProfile"
             class="text-white hover:bg-white/20 p-2 rounded-lg transition-colors"
           >
             <i class="fi fi-rr-settings text-xl"></i>
@@ -46,9 +41,6 @@
     >
       <router-view></router-view>
     </main>
-
-    <!-- 프로필 모달 -->
-    <WorkerProfile v-if="showProfile" @close="showProfile = false" />
   </div>
 </template>
 <script setup>
@@ -57,13 +49,11 @@ import ApiDebugPanel from "@/components/dev/ApiDebugPanel.vue";
 import { ref, computed } from "vue";
 import { useAuthStore } from "@/stores/auth";
 import { RouterLink, RouterView, useRoute, useRouter } from "vue-router";
-import WorkerProfile from "@/components/worker/WorkerProfile.vue";
 
 const router = useRouter();
 const route = useRoute();
 const authStore = useAuthStore();
 const isProfileMenuOpen = ref(false);
-const showProfile = ref(false);
 
 const confirmLogout = () => {
   const isConfirmed = window.confirm("정말 로그아웃하시겠습니까?");
@@ -79,7 +69,11 @@ const handleLogout = () => {
 };
 
 const goToHome = () => {
-  router.push({ name: "MobileJobs" });
+  router.push({ name: "WorkerWork" });
+};
+
+const goToProfile = () => {
+  router.push({ name: "WorkerProfile" });
 };
 
 const todayText = new Date().toLocaleDateString("ko-KR", {

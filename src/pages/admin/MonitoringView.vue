@@ -1,6 +1,9 @@
 ㄱ
 <template>
-  <div class="p-4 bg-slate-50 dark:bg-slate-900 h-screen overflow-hidden" @click="showCalendar = false">
+  <div
+    class="p-4 bg-slate-50 dark:bg-slate-900 h-screen overflow-hidden"
+    @click="showCalendar = false"
+  >
     <!-- 리포트 & 통계 헤더 -->
     <div class="mb-3">
       <!-- <h1 class="text-xl font-bold mb-3" style="color: #1e293b">리포트 & 통계</h1> -->
@@ -15,13 +18,17 @@
               class="p-2.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-center"
               title="이전 주"
             >
-              <i class="fi fi-rr-angle-left text-2xl text-slate-700 dark:text-slate-300"></i>
+              <i
+                class="fi fi-rr-angle-left text-2xl text-slate-700 dark:text-slate-300"
+              ></i>
             </button>
             <div
               @click.stop="showCalendar = !showCalendar"
               class="px-6 py-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex flex-col items-center text-center"
             >
-              <div class="text-lg font-semibold text-slate-900 dark:text-slate-100">
+              <div
+                class="text-lg font-semibold text-slate-900 dark:text-slate-100"
+              >
                 {{ getWeekLabel(dateRange.start) }}
               </div>
               <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
@@ -34,100 +41,129 @@
               class="p-2.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-center"
               title="다음 주"
             >
-              <i class="fi fi-rr-angle-right text-2xl text-slate-700 dark:text-slate-300"></i>
+              <i
+                class="fi fi-rr-angle-right text-2xl text-slate-700 dark:text-slate-300"
+              ></i>
             </button>
 
-          <!-- 달력 모달 -->
-          <div
-            v-if="showCalendar"
-            class="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 z-50 border border-slate-200 dark:border-slate-700 min-w-[320px]"
-            @click.stop
-          >
-            <!-- 헤더 -->
-            <div class="flex items-center justify-between mb-6">
-              <button
-                @click="prevCalendarMonth"
-                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
-                title="이전 달"
-              >
-                <i class="fi fi-rr-angle-left text-lg"></i>
-              </button>
-              <div class="text-lg font-bold text-slate-900 dark:text-white px-4">
-                {{ calendarYear }}년 {{ String(calendarMonth + 1).padStart(2, "0") }}월
+            <!-- 달력 모달 -->
+            <div
+              v-if="showCalendar"
+              class="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 z-50 border border-slate-200 dark:border-slate-700 min-w-[320px]"
+              @click.stop
+            >
+              <!-- 헤더 -->
+              <div class="flex items-center justify-between mb-6">
+                <button
+                  @click="prevCalendarMonth"
+                  class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
+                  title="이전 달"
+                >
+                  <i class="fi fi-rr-angle-left text-lg"></i>
+                </button>
+                <div
+                  class="text-lg font-bold text-slate-900 dark:text-white px-4"
+                >
+                  {{ calendarYear }}년
+                  {{ String(calendarMonth + 1).padStart(2, "0") }}월
+                </div>
+                <button
+                  @click="nextCalendarMonth"
+                  class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
+                  title="다음 달"
+                >
+                  <i class="fi fi-rr-angle-right text-lg"></i>
+                </button>
               </div>
-              <button
-                @click="nextCalendarMonth"
-                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
-                title="다음 달"
-              >
-                <i class="fi fi-rr-angle-right text-lg"></i>
-              </button>
-            </div>
 
-            <!-- 요일 헤더 -->
-            <div class="grid grid-cols-7 gap-1 mb-2">
+              <!-- 요일 헤더 -->
+              <div class="grid grid-cols-7 gap-1 mb-2">
+                <div
+                  v-for="day in ['일', '월', '화', '수', '목', '금', '토']"
+                  :key="day"
+                  :class="[
+                    'text-center text-xs font-semibold py-2',
+                    day === '일' ? 'text-red-500 dark:text-red-400' : '',
+                    day === '토' ? 'text-blue-500 dark:text-blue-400' : '',
+                    day !== '일' && day !== '토'
+                      ? 'text-slate-500 dark:text-slate-400'
+                      : '',
+                  ]"
+                >
+                  {{ day }}
+                </div>
+              </div>
+
+              <!-- 달력 그리드 -->
+              <div class="grid grid-cols-7 gap-0.5">
+                <div
+                  v-for="d in calendarDays"
+                  :key="d.key"
+                  :class="[
+                    'aspect-square flex items-center justify-center text-sm cursor-pointer select-none transition-all duration-200 relative',
+                    d.outside
+                      ? 'text-slate-300 dark:text-slate-600'
+                      : isDateInRange(d.date)
+                        ? 'font-semibold text-white'
+                        : 'text-slate-700 dark:text-slate-200',
+                    // 주간의 첫 번째 날짜 (월요일)
+                    isDateInRange(d.date) && isWeekStart(d.date) && !d.outside
+                      ? 'rounded-l-xl'
+                      : '',
+                    // 주간의 마지막 날짜 (일요일)
+                    isDateInRange(d.date) && d.date.getDay() === 0 && !d.outside
+                      ? 'rounded-r-xl'
+                      : '',
+                    // 주간의 중간 날짜들
+                    isDateInRange(d.date) &&
+                    !isWeekStart(d.date) &&
+                    d.date.getDay() !== 0 &&
+                    !d.outside
+                      ? ''
+                      : '',
+                    // 선택되지 않은 날짜는 둥근 모서리
+                    !isDateInRange(d.date) && !d.outside ? 'rounded-xl' : '',
+                  ]"
+                  :style="
+                    isDateInRange(d.date) && !d.outside
+                      ? 'background-color: #3b82f6;'
+                      : ''
+                  "
+                  @click="selectWeekFromDate(d.date)"
+                  @mouseenter="hoveredCalendarDate = d.date"
+                  @mouseleave="hoveredCalendarDate = null"
+                >
+                  <span :class="['relative z-10']">
+                    {{ d.date.getDate() }}
+                  </span>
+                  <!-- 오늘 표시 -->
+                  <span
+                    v-if="isToday(d.date) && !isDateInRange(d.date)"
+                    class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full"
+                    style="background-color: #3b82f6"
+                  ></span>
+                </div>
+              </div>
+
+              <!-- 선택된 주간 표시 -->
               <div
-                v-for="day in ['일', '월', '화', '수', '목', '금', '토']"
-                :key="day"
-                :class="[
-                  'text-center text-xs font-semibold py-2',
-                  day === '일' ? 'text-red-500 dark:text-red-400' : '',
-                  day === '토' ? 'text-blue-500 dark:text-blue-400' : '',
-                  day !== '일' && day !== '토' ? 'text-slate-500 dark:text-slate-400' : '',
-                ]"
+                v-if="dateRange"
+                class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700"
               >
-                {{ day }}
-              </div>
-            </div>
-
-            <!-- 달력 그리드 -->
-            <div class="grid grid-cols-7 gap-0.5">
-              <div
-                v-for="d in calendarDays"
-                :key="d.key"
-                :class="[
-                  'aspect-square flex items-center justify-center text-sm cursor-pointer select-none transition-all duration-200 relative',
-                  d.outside
-                    ? 'text-slate-300 dark:text-slate-600'
-                    : isDateInRange(d.date)
-                      ? 'font-semibold text-white'
-                      : 'text-slate-700 dark:text-slate-200',
-                  // 주간의 첫 번째 날짜 (월요일)
-                  isDateInRange(d.date) && isWeekStart(d.date) && !d.outside ? 'rounded-l-xl' : '',
-                  // 주간의 마지막 날짜 (일요일)
-                  isDateInRange(d.date) && d.date.getDay() === 0 && !d.outside ? 'rounded-r-xl' : '',
-                  // 주간의 중간 날짜들
-                  isDateInRange(d.date) && !isWeekStart(d.date) && d.date.getDay() !== 0 && !d.outside ? '' : '',
-                  // 선택되지 않은 날짜는 둥근 모서리
-                  !isDateInRange(d.date) && !d.outside ? 'rounded-xl' : '',
-                ]"
-                :style="isDateInRange(d.date) && !d.outside ? 'background-color: #3b82f6;' : ''"
-                @click="selectWeekFromDate(d.date)"
-                @mouseenter="hoveredCalendarDate = d.date"
-                @mouseleave="hoveredCalendarDate = null"
-              >
-                <span :class="['relative z-10']">
-                  {{ d.date.getDate() }}
-                </span>
-                <!-- 오늘 표시 -->
-                <span
-                  v-if="isToday(d.date) && !isDateInRange(d.date)"
-                  class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full"
-                  style="background-color: #3b82f6"
-                ></span>
-              </div>
-            </div>
-
-            <!-- 선택된 주간 표시 -->
-            <div v-if="dateRange" class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-              <div class="text-xs text-slate-500 dark:text-slate-400 text-center">선택된 주간</div>
-              <div class="text-sm font-semibold text-slate-900 dark:text-white text-center mt-1">
-                {{ formatDateRange(dateRange.start) }} ~
-                {{ formatDateRange(dateRange.end) }}
+                <div
+                  class="text-xs text-slate-500 dark:text-slate-400 text-center"
+                >
+                  선택된 주간
+                </div>
+                <div
+                  class="text-sm font-semibold text-slate-900 dark:text-white text-center mt-1"
+                >
+                  {{ formatDateRange(dateRange.start) }} ~
+                  {{ formatDateRange(dateRange.end) }}
+                </div>
               </div>
             </div>
           </div>
-        </div>
         </div>
 
         <!-- 액션 버튼 (오른쪽 상단) -->
@@ -149,26 +185,37 @@
     </div>
 
     <!-- 왼쪽/오른쪽 2분할 레이아웃 -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[calc(100vh-180px)] overflow-y-auto">
+    <div
+      class="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[calc(100vh-180px)] overflow-y-auto"
+    >
       <!-- 왼쪽 컬럼 -->
       <div class="space-y-3">
         <!-- 주요 지표 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">주요 지표</h2>
+          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
+            주요 지표
+          </h2>
           <div class="flex gap-3">
             <!-- 이용률 카드 -->
             <div
               class="text-white p-3 rounded-2xl shadow-sm flex-1"
               style="
-                background: linear-gradient(135deg, rgba(34, 211, 238, 0.9), rgba(14, 165, 233, 0.95));
+                background: linear-gradient(
+                  135deg,
+                  rgba(34, 211, 238, 0.9),
+                  rgba(14, 165, 233, 0.95)
+                );
               "
             >
               <div class="text-center mb-2">
                 <div>
                   <div class="text-xs font-medium opacity-90">이용률</div>
-                  <div class="text-lg sm:text-xl font-bold mt-1">{{ keyMetrics.utilizationRate }}%</div>
+                  <div class="text-lg sm:text-xl font-bold mt-1">
+                    {{ keyMetrics.utilizationRate }}%
+                  </div>
                   <div class="text-xs mt-1 text-red-200">
-                    <i class="fi fi-rr-arrow-down mr-1"></i>{{ Math.abs(keyMetrics.utilizationChange) }}%
+                    <i class="fi fi-rr-arrow-down mr-1"></i
+                    >{{ Math.abs(keyMetrics.utilizationChange) }}%
                   </div>
                 </div>
               </div>
@@ -178,15 +225,22 @@
             <div
               class="text-white p-3 rounded-2xl shadow-sm flex-1"
               style="
-                background: linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(22, 163, 74, 0.95));
+                background: linear-gradient(
+                  135deg,
+                  rgba(34, 197, 94, 0.9),
+                  rgba(22, 163, 74, 0.95)
+                );
               "
             >
               <div class="text-center mb-2">
                 <div>
                   <div class="text-xs font-medium opacity-90">재방문율</div>
-                  <div class="text-lg sm:text-xl font-bold mt-1">{{ additionalMetrics.revisitRate }}%</div>
+                  <div class="text-lg sm:text-xl font-bold mt-1">
+                    {{ additionalMetrics.revisitRate }}%
+                  </div>
                   <div class="text-xs mt-1 text-green-200">
-                    <i class="fi fi-rr-arrow-up mr-1"></i>{{ additionalMetrics.revisitChange }}%
+                    <i class="fi fi-rr-arrow-up mr-1"></i
+                    >{{ additionalMetrics.revisitChange }}%
                   </div>
                 </div>
               </div>
@@ -196,23 +250,28 @@
             <div
               class="text-white p-3 rounded-2xl shadow-sm flex-1"
               style="
-                background: linear-gradient(135deg, rgba(251, 191, 36, 0.9), rgba(245, 158, 11, 0.95));
+                background: linear-gradient(
+                  135deg,
+                  rgba(251, 191, 36, 0.9),
+                  rgba(245, 158, 11, 0.95)
+                );
               "
             >
               <div class="text-center mb-2">
                 <div>
-                  <div class="text-xs font-medium opacity-90">홈 배송 선택률</div>
-                  <div class="text-lg sm:text-xl font-bold mt-1">{{ additionalMetrics.deliveryRate }}%</div>
+                  <div class="text-xs font-medium opacity-90">
+                    홈 배송 선택률
+                  </div>
+                  <div class="text-lg sm:text-xl font-bold mt-1">
+                    {{ additionalMetrics.deliveryRate }}%
+                  </div>
                   <div class="text-xs mt-1 text-green-200">
-                    <i class="fi fi-rr-arrow-up mr-1"></i>{{ additionalMetrics.deliveryChange }}%
+                    <i class="fi fi-rr-arrow-up mr-1"></i
+                    >{{ additionalMetrics.deliveryChange }}%
                   </div>
                 </div>
               </div>
             </div>
-
-
-
-
           </div>
         </section>
 
@@ -222,27 +281,36 @@
           <div
             class="text-white p-3 rounded-2xl shadow-sm flex-1"
             style="
-              background: linear-gradient(135deg, rgba(96, 165, 250, 0.9), rgba(59, 130, 246, 0.95));
+              background: linear-gradient(
+                135deg,
+                rgba(96, 165, 250, 0.9),
+                rgba(59, 130, 246, 0.95)
+              );
             "
-            >
-              <div class="text-center mb-2">
-                <div>
-                  <div class="text-xs font-medium opacity-90">매출</div>
-                  <div class="text-lg sm:text-xl font-bold mt-1">
-                    {{ formatCurrency(keyMetrics.revenue) }}
-                  </div>
-                  <div class="text-xs mt-1 text-green-200">
-                    <i class="fi fi-rr-arrow-up mr-1"></i>{{ keyMetrics.revenueChange }}%
-                  </div>
+          >
+            <div class="text-center mb-2">
+              <div>
+                <div class="text-xs font-medium opacity-90">매출</div>
+                <div class="text-lg sm:text-xl font-bold mt-1">
+                  {{ formatCurrency(keyMetrics.revenue) }}
+                </div>
+                <div class="text-xs mt-1 text-green-200">
+                  <i class="fi fi-rr-arrow-up mr-1"></i
+                  >{{ keyMetrics.revenueChange }}%
                 </div>
               </div>
             </div>
+          </div>
 
           <!-- 이용객 카드 -->
           <div
             class="text-white p-3 rounded-2xl shadow-sm flex-1"
             style="
-              background: linear-gradient(135deg, rgba(107, 114, 128, 0.9), rgba(75, 85, 99, 0.95));
+              background: linear-gradient(
+                135deg,
+                rgba(107, 114, 128, 0.9),
+                rgba(75, 85, 99, 0.95)
+              );
             "
           >
             <div class="text-center mb-2">
@@ -252,19 +320,18 @@
                   {{ formatNumber(keyMetrics.users) }}명
                 </div>
                 <div class="text-xs mt-1 text-green-200">
-                  <i class="fi fi-rr-arrow-up mr-1"></i>{{ keyMetrics.usersChange }}%
+                  <i class="fi fi-rr-arrow-up mr-1"></i
+                  >{{ keyMetrics.usersChange }}%
                 </div>
               </div>
             </div>
           </div>
-
-
-
-
         </div>
         <!-- 행사 유형별 매출 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">행사 유형별 매출</h2>
+          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
+            행사 유형별 매출
+          </h2>
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3">
             <div class="h-40">
               <canvas ref="eventTypeChartRef"></canvas>
@@ -284,15 +351,24 @@
 
         <!-- 사이즈별 비율 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">사이즈별 비율</h2>
+          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
+            사이즈별 비율
+          </h2>
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3">
             <div class="flex items-center justify-center gap-4">
               <div class="w-32 h-32">
                 <canvas ref="sizeRatioChartRef"></canvas>
               </div>
               <div class="space-y-2">
-                <div v-for="segment in sizeRatio" :key="segment.size" class="flex items-center gap-2">
-                  <div class="w-4 h-4 rounded-full" :style="{ backgroundColor: segment.color }"></div>
+                <div
+                  v-for="segment in sizeRatio"
+                  :key="segment.size"
+                  class="flex items-center gap-2"
+                >
+                  <div
+                    class="w-4 h-4 rounded-full"
+                    :style="{ backgroundColor: segment.color }"
+                  ></div>
                   <span class="text-sm text-slate-700 dark:text-slate-300">
                     {{ segment.size }} : {{ segment.percentage }}%
                   </span>
@@ -307,7 +383,9 @@
       <div class="space-y-3">
         <!-- 피크타임 분석 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">피크타임 분석</h2>
+          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
+            피크타임 분석
+          </h2>
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3">
             <div class="h-40">
               <canvas ref="peakTimeChartRef"></canvas>
@@ -317,208 +395,235 @@
 
         <!-- 지역별 배송 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">지역별 배송</h2>
-          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3">
+          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
+            지역별 배송
+          </h2>
+          <div
+            class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3 overflow-hidden"
+          >
             <!-- 히트맵과 Top 3를 나란히 배치 (큰 화면) -->
             <div class="flex flex-col lg:flex-row gap-3 items-start">
               <!-- 히트맵 스타일 지도 -->
-              <div class="flex flex-col items-center gap-2 flex-1 w-full">
-              <!-- 1행: 서북권, 동북권 -->
-              <div class="flex justify-center gap-2 w-full">
-                <div
-                  v-if="deliveryHeatmap[0]"
-                  :class="[
-                    getHeatmapColor(deliveryHeatmap[0].count || 0),
-                    getHeatmapTextColor(deliveryHeatmap[0].count || 0),
-                  ]"
-                  class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
-                  @click="selectRegion(deliveryHeatmap[0])"
-                  @mouseenter="
-                    (e) => {
-                      hoveredRegion = deliveryHeatmap[0];
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      regionTooltipPosition.x = rect.left + rect.width / 2;
-                      regionTooltipPosition.y = rect.top - 10;
-                    }
-                  "
-                  @mouseleave="hoveredRegion = null"
-                >
-                  <div class="font-bold text-sm">{{ deliveryHeatmap[0].name }}</div>
-                  <div class="text-[9px] mt-1 opacity-75 leading-tight">
-                    {{ getRegionDescription(deliveryHeatmap[0].name) }}
-                  </div>
-                </div>
-                <div
-                  v-if="deliveryHeatmap[1]"
-                  :class="[
-                    getHeatmapColor(deliveryHeatmap[1].count || 0),
-                    getHeatmapTextColor(deliveryHeatmap[1].count || 0),
-                  ]"
-                  class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
-                  @click="selectRegion(deliveryHeatmap[1])"
-                  @mouseenter="
-                    (e) => {
-                      hoveredRegion = deliveryHeatmap[1];
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      regionTooltipPosition.x = rect.left + rect.width / 2;
-                      regionTooltipPosition.y = rect.top - 10;
-                    }
-                  "
-                  @mouseleave="hoveredRegion = null"
-                >
-                  <div class="font-bold text-sm">{{ deliveryHeatmap[1].name }}</div>
-                  <div class="text-[9px] mt-1 opacity-75 leading-tight">
-                    {{ getRegionDescription(deliveryHeatmap[1].name) }}
-                  </div>
-                </div>
-              </div>
-
-              <!-- 2행: 서남권, 도심권, 동남권 -->
-              <div class="flex justify-center gap-2 w-full">
-                <div
-                  v-if="deliveryHeatmap[2]"
-                  :class="[
-                    getHeatmapColor(deliveryHeatmap[2].count || 0),
-                    getHeatmapTextColor(deliveryHeatmap[2].count || 0),
-                  ]"
-                  class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
-                  @click="selectRegion(deliveryHeatmap[2])"
-                  @mouseenter="
-                    (e) => {
-                      hoveredRegion = deliveryHeatmap[2];
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      regionTooltipPosition.x = rect.left + rect.width / 2;
-                      regionTooltipPosition.y = rect.top - 10;
-                    }
-                  "
-                  @mouseleave="hoveredRegion = null"
-                >
-                  <div class="font-bold text-sm">{{ deliveryHeatmap[2].name }}</div>
-                  <div class="text-[9px] mt-1 opacity-75 leading-tight">
-                    {{ getRegionDescription(deliveryHeatmap[2].name) }}
-                  </div>
-                </div>
-                <div
-                  v-if="deliveryHeatmap[3]"
-                  :class="[
-                    getHeatmapColor(deliveryHeatmap[3].count || 0),
-                    getHeatmapTextColor(deliveryHeatmap[3].count || 0),
-                  ]"
-                  class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
-                  @click="selectRegion(deliveryHeatmap[3])"
-                  @mouseenter="
-                    (e) => {
-                      hoveredRegion = deliveryHeatmap[3];
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      regionTooltipPosition.x = rect.left + rect.width / 2;
-                      regionTooltipPosition.y = rect.top - 10;
-                    }
-                  "
-                  @mouseleave="hoveredRegion = null"
-                >
-                  <div class="font-bold text-sm">{{ deliveryHeatmap[3].name }}</div>
-                  <div class="text-[9px] mt-1 opacity-75 leading-tight">
-                    {{ getRegionDescription(deliveryHeatmap[3].name) }}
-                  </div>
-                </div>
-                <div
-                  v-if="deliveryHeatmap[4]"
-                  :class="[
-                    getHeatmapColor(deliveryHeatmap[4].count || 0),
-                    getHeatmapTextColor(deliveryHeatmap[4].count || 0),
-                  ]"
-                  class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
-                  @click="selectRegion(deliveryHeatmap[4])"
-                  @mouseenter="
-                    (e) => {
-                      hoveredRegion = deliveryHeatmap[4];
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      regionTooltipPosition.x = rect.left + rect.width / 2;
-                      regionTooltipPosition.y = rect.top - 10;
-                    }
-                  "
-                  @mouseleave="hoveredRegion = null"
-                >
-                  <div class="font-bold text-sm">{{ deliveryHeatmap[4].name }}</div>
-                  <div class="text-[9px] mt-1 opacity-75 leading-tight">
-                    {{ getRegionDescription(deliveryHeatmap[4].name) }}
-                  </div>
-                </div>
-              </div>
-
-              <!-- 3행: 인천&경기, 지방 -->
-              <div class="flex justify-center gap-2 w-full">
-                <div
-                  v-if="deliveryHeatmap[5]"
-                  :class="[
-                    getHeatmapColor(deliveryHeatmap[5].count || 0),
-                    getHeatmapTextColor(deliveryHeatmap[5].count || 0),
-                  ]"
-                  class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
-                  @click="selectRegion(deliveryHeatmap[5])"
-                  @mouseenter="
-                    (e) => {
-                      hoveredRegion = deliveryHeatmap[5];
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      regionTooltipPosition.x = rect.left + rect.width / 2;
-                      regionTooltipPosition.y = rect.top - 10;
-                    }
-                  "
-                  @mouseleave="hoveredRegion = null"
-                >
-                  <div class="font-bold text-sm">{{ deliveryHeatmap[5].name }}</div>
-                  <div class="text-[9px] mt-1 opacity-75 leading-tight">
-                    {{ getRegionDescription(deliveryHeatmap[5].name) }}
-                  </div>
-                </div>
-                <div
-                  v-if="deliveryHeatmap[6]"
-                  :class="[
-                    getHeatmapColor(deliveryHeatmap[6].count || 0),
-                    getHeatmapTextColor(deliveryHeatmap[6].count || 0),
-                  ]"
-                  class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
-                  @click="selectRegion(deliveryHeatmap[6])"
-                  @mouseenter="
-                    (e) => {
-                      hoveredRegion = deliveryHeatmap[6];
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      regionTooltipPosition.x = rect.left + rect.width / 2;
-                      regionTooltipPosition.y = rect.top - 10;
-                    }
-                  "
-                  @mouseleave="hoveredRegion = null"
-                >
-                  <div class="font-bold text-sm">{{ deliveryHeatmap[6].name }}</div>
-                  <div class="text-[9px] mt-1 opacity-75 leading-tight">
-                    {{ getRegionDescription(deliveryHeatmap[6].name) }}
-                  </div>
-                </div>
-              </div>
-
-              <!-- 지역별 배송 툴팁 -->
               <div
-                v-if="hoveredRegion"
-                class="fixed bg-slate-900 dark:bg-slate-700 text-white text-xs rounded-lg p-3 shadow-lg z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full"
-                :style="{
-                  left: `${regionTooltipPosition.x}px`,
-                  top: `${regionTooltipPosition.y}px`,
-                }"
+                class="flex flex-col items-center gap-2 flex-1 w-full min-w-0"
               >
-                <div class="font-semibold mb-2">{{ hoveredRegion.name }}</div>
-                <div class="mb-1">건수: {{ hoveredRegion.count || 0 }}건</div>
-                <div class="mb-1">비율: {{ hoveredRegion.percentage }}%</div>
+                <!-- 1행: 서북권, 동북권 -->
+                <div class="flex justify-center gap-2 w-full">
+                  <div
+                    v-if="deliveryHeatmap[0]"
+                    :class="[
+                      getHeatmapColor(deliveryHeatmap[0].count || 0),
+                      getHeatmapTextColor(deliveryHeatmap[0].count || 0),
+                    ]"
+                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    @click="selectRegion(deliveryHeatmap[0])"
+                    @mouseenter="
+                      (e) => {
+                        hoveredRegion = deliveryHeatmap[0];
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        regionTooltipPosition.x = rect.left + rect.width / 2;
+                        regionTooltipPosition.y = rect.top - 10;
+                      }
+                    "
+                    @mouseleave="hoveredRegion = null"
+                  >
+                    <div class="font-bold text-sm">
+                      {{ deliveryHeatmap[0].name }}
+                    </div>
+                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                      {{ getRegionDescription(deliveryHeatmap[0].name) }}
+                    </div>
+                  </div>
+                  <div
+                    v-if="deliveryHeatmap[1]"
+                    :class="[
+                      getHeatmapColor(deliveryHeatmap[1].count || 0),
+                      getHeatmapTextColor(deliveryHeatmap[1].count || 0),
+                    ]"
+                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    @click="selectRegion(deliveryHeatmap[1])"
+                    @mouseenter="
+                      (e) => {
+                        hoveredRegion = deliveryHeatmap[1];
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        regionTooltipPosition.x = rect.left + rect.width / 2;
+                        regionTooltipPosition.y = rect.top - 10;
+                      }
+                    "
+                    @mouseleave="hoveredRegion = null"
+                  >
+                    <div class="font-bold text-sm">
+                      {{ deliveryHeatmap[1].name }}
+                    </div>
+                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                      {{ getRegionDescription(deliveryHeatmap[1].name) }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 2행: 서남권, 도심권, 동남권 -->
+                <div class="flex justify-center gap-2 w-full">
+                  <div
+                    v-if="deliveryHeatmap[2]"
+                    :class="[
+                      getHeatmapColor(deliveryHeatmap[2].count || 0),
+                      getHeatmapTextColor(deliveryHeatmap[2].count || 0),
+                    ]"
+                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    @click="selectRegion(deliveryHeatmap[2])"
+                    @mouseenter="
+                      (e) => {
+                        hoveredRegion = deliveryHeatmap[2];
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        regionTooltipPosition.x = rect.left + rect.width / 2;
+                        regionTooltipPosition.y = rect.top - 10;
+                      }
+                    "
+                    @mouseleave="hoveredRegion = null"
+                  >
+                    <div class="font-bold text-sm">
+                      {{ deliveryHeatmap[2].name }}
+                    </div>
+                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                      {{ getRegionDescription(deliveryHeatmap[2].name) }}
+                    </div>
+                  </div>
+                  <div
+                    v-if="deliveryHeatmap[3]"
+                    :class="[
+                      getHeatmapColor(deliveryHeatmap[3].count || 0),
+                      getHeatmapTextColor(deliveryHeatmap[3].count || 0),
+                    ]"
+                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    @click="selectRegion(deliveryHeatmap[3])"
+                    @mouseenter="
+                      (e) => {
+                        hoveredRegion = deliveryHeatmap[3];
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        regionTooltipPosition.x = rect.left + rect.width / 2;
+                        regionTooltipPosition.y = rect.top - 10;
+                      }
+                    "
+                    @mouseleave="hoveredRegion = null"
+                  >
+                    <div class="font-bold text-sm">
+                      {{ deliveryHeatmap[3].name }}
+                    </div>
+                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                      {{ getRegionDescription(deliveryHeatmap[3].name) }}
+                    </div>
+                  </div>
+                  <div
+                    v-if="deliveryHeatmap[4]"
+                    :class="[
+                      getHeatmapColor(deliveryHeatmap[4].count || 0),
+                      getHeatmapTextColor(deliveryHeatmap[4].count || 0),
+                    ]"
+                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    @click="selectRegion(deliveryHeatmap[4])"
+                    @mouseenter="
+                      (e) => {
+                        hoveredRegion = deliveryHeatmap[4];
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        regionTooltipPosition.x = rect.left + rect.width / 2;
+                        regionTooltipPosition.y = rect.top - 10;
+                      }
+                    "
+                    @mouseleave="hoveredRegion = null"
+                  >
+                    <div class="font-bold text-sm">
+                      {{ deliveryHeatmap[4].name }}
+                    </div>
+                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                      {{ getRegionDescription(deliveryHeatmap[4].name) }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 3행: 인천&경기, 지방 -->
+                <div class="flex justify-center gap-2 w-full">
+                  <div
+                    v-if="deliveryHeatmap[5]"
+                    :class="[
+                      getHeatmapColor(deliveryHeatmap[5].count || 0),
+                      getHeatmapTextColor(deliveryHeatmap[5].count || 0),
+                    ]"
+                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    @click="selectRegion(deliveryHeatmap[5])"
+                    @mouseenter="
+                      (e) => {
+                        hoveredRegion = deliveryHeatmap[5];
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        regionTooltipPosition.x = rect.left + rect.width / 2;
+                        regionTooltipPosition.y = rect.top - 10;
+                      }
+                    "
+                    @mouseleave="hoveredRegion = null"
+                  >
+                    <div class="font-bold text-sm">
+                      {{ deliveryHeatmap[5].name }}
+                    </div>
+                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                      {{ getRegionDescription(deliveryHeatmap[5].name) }}
+                    </div>
+                  </div>
+                  <div
+                    v-if="deliveryHeatmap[6]"
+                    :class="[
+                      getHeatmapColor(deliveryHeatmap[6].count || 0),
+                      getHeatmapTextColor(deliveryHeatmap[6].count || 0),
+                    ]"
+                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    @click="selectRegion(deliveryHeatmap[6])"
+                    @mouseenter="
+                      (e) => {
+                        hoveredRegion = deliveryHeatmap[6];
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        regionTooltipPosition.x = rect.left + rect.width / 2;
+                        regionTooltipPosition.y = rect.top - 10;
+                      }
+                    "
+                    @mouseleave="hoveredRegion = null"
+                  >
+                    <div class="font-bold text-sm">
+                      {{ deliveryHeatmap[6].name }}
+                    </div>
+                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                      {{ getRegionDescription(deliveryHeatmap[6].name) }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- 지역별 배송 툴팁 -->
+                <div
+                  v-if="hoveredRegion"
+                  class="fixed bg-slate-900 dark:bg-slate-700 text-white text-xs rounded-lg p-3 shadow-lg z-50 pointer-events-none transform -translate-x-1/2 -translate-y-full"
+                  :style="{
+                    left: `${regionTooltipPosition.x}px`,
+                    top: `${regionTooltipPosition.y}px`,
+                  }"
+                >
+                  <div class="font-semibold mb-2">{{ hoveredRegion.name }}</div>
+                  <div class="mb-1">건수: {{ hoveredRegion.count || 0 }}건</div>
+                  <div class="mb-1">비율: {{ hoveredRegion.percentage }}%</div>
+                </div>
               </div>
-            </div>
 
               <!-- Top 3 리스트 (큰 화면에서는 오른쪽에 세로 배치) -->
-              <div class="w-full lg:w-auto lg:min-w-[140px]">
-                <div class="text-xs font-semibold mb-2.5 text-center lg:text-left" style="color: #1e293b">Top 3</div>
+              <div
+                class="w-full lg:w-auto lg:min-w-[140px] lg:max-w-[180px] flex-shrink-0"
+              >
+                <div
+                  class="text-xs font-semibold mb-2.5 text-center lg:text-left"
+                  style="color: #1e293b"
+                >
+                  Top 3
+                </div>
                 <div class="flex flex-row lg:flex-col gap-2.5">
                   <div
                     v-for="(region, index) in deliveryRegions"
                     :key="index"
-                    class="p-2 rounded-lg shadow-sm bg-white dark:bg-slate-800 flex-1 lg:flex-none transition-all hover:shadow-md"
+                    class="p-2 rounded-lg shadow-sm bg-white dark:bg-slate-800 flex-1 lg:flex-none transition-all hover:shadow-md min-w-0 overflow-hidden"
                     :style="
                       index === 0
                         ? 'border: 2px solid #3b82f6; color: #3b82f6; background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.1));'
@@ -528,11 +633,19 @@
                     "
                   >
                     <div class="flex items-center justify-between mb-1">
-                      <div class="text-[10px] font-bold opacity-90">{{ index + 1 }}위</div>
-                      <div class="text-[10px] font-semibold opacity-75">{{ region.percentage }}%</div>
+                      <div class="text-[10px] font-bold opacity-90">
+                        {{ index + 1 }}위
+                      </div>
+                      <div class="text-[10px] font-semibold opacity-75">
+                        {{ region.percentage }}%
+                      </div>
                     </div>
-                    <div class="text-sm font-bold">{{ region.name }}</div>
-                    <div class="text-[9px] mt-0.5 opacity-70">{{ region.count || 0 }}건</div>
+                    <div class="text-sm font-bold truncate">
+                      {{ region.name }}
+                    </div>
+                    <div class="text-[9px] mt-0.5 opacity-70">
+                      {{ region.count || 0 }}건
+                    </div>
                   </div>
                 </div>
               </div>
@@ -542,7 +655,9 @@
 
         <!-- 인사이트 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">인사이트</h2>
+          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
+            인사이트
+          </h2>
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3">
             <div class="space-y-2">
               <div
@@ -550,7 +665,10 @@
                 :key="index"
                 class="flex items-start gap-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-lg"
               >
-                <div class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0" style="background-color: #3b82f6"></div>
+                <div
+                  class="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                  style="background-color: #3b82f6"
+                ></div>
                 <p class="text-xs text-slate-700 dark:text-slate-300">
                   {{ insight }}
                 </p>
@@ -613,7 +731,9 @@ const getWeekLabel = (date) => {
   firstMonday.setDate(firstMonday.getDate() + (7 - daysToFirstMonday));
 
   // 주차 계산
-  const daysDiff = Math.floor((date.getTime() - firstMonday.getTime()) / (1000 * 60 * 60 * 24));
+  const daysDiff = Math.floor(
+    (date.getTime() - firstMonday.getTime()) / (1000 * 60 * 60 * 24)
+  );
   let weekNumber = Math.floor(daysDiff / 7) + 1;
 
   // weekNumber가 0 이하인 경우 첫째주로 처리
@@ -630,8 +750,12 @@ const getWeekLabel = (date) => {
 
 const prevDateRange = () => {
   const days = 7; // 주간(7일) 범위
-  const newStart = new Date(dateRange.value.start.getTime() - days * 24 * 60 * 60 * 1000);
-  const newEnd = new Date(dateRange.value.end.getTime() - days * 24 * 60 * 60 * 1000);
+  const newStart = new Date(
+    dateRange.value.start.getTime() - days * 24 * 60 * 60 * 1000
+  );
+  const newEnd = new Date(
+    dateRange.value.end.getTime() - days * 24 * 60 * 60 * 1000
+  );
   // 반응성을 보장하기 위해 새로운 객체 할당
   dateRange.value = {
     start: newStart,
@@ -641,8 +765,12 @@ const prevDateRange = () => {
 
 const nextDateRange = () => {
   const days = 7; // 주간(7일) 범위
-  const newStart = new Date(dateRange.value.start.getTime() + days * 24 * 60 * 60 * 1000);
-  const newEnd = new Date(dateRange.value.end.getTime() + days * 24 * 60 * 60 * 1000);
+  const newStart = new Date(
+    dateRange.value.start.getTime() + days * 24 * 60 * 60 * 1000
+  );
+  const newEnd = new Date(
+    dateRange.value.end.getTime() + days * 24 * 60 * 60 * 1000
+  );
   // 반응성을 보장하기 위해 새로운 객체 할당
   dateRange.value = {
     start: newStart,
@@ -688,11 +816,19 @@ const calendarDays = computed(() => {
 
 // 달력 월 이동
 const prevCalendarMonth = () => {
-  calendarViewDate.value = new Date(calendarYear.value, calendarMonth.value - 1, 1);
+  calendarViewDate.value = new Date(
+    calendarYear.value,
+    calendarMonth.value - 1,
+    1
+  );
 };
 
 const nextCalendarMonth = () => {
-  calendarViewDate.value = new Date(calendarYear.value, calendarMonth.value + 1, 1);
+  calendarViewDate.value = new Date(
+    calendarYear.value,
+    calendarMonth.value + 1,
+    1
+  );
 };
 
 // 날짜가 현재 선택된 주간 범위에 있는지 확인
@@ -762,7 +898,9 @@ const previousPeriodReservations = computed(() => {
   // dateRange.value를 명시적으로 참조하여 반응성 보장
   const range = dateRange.value;
   const days = 7;
-  const prevStart = new Date(range.start.getTime() - days * 24 * 60 * 60 * 1000);
+  const prevStart = new Date(
+    range.start.getTime() - days * 24 * 60 * 60 * 1000
+  );
   const prevEnd = new Date(range.end.getTime() - days * 24 * 60 * 60 * 1000);
 
   const startDate = formatDateRange(prevStart);
@@ -780,26 +918,43 @@ const keyMetrics = computed(() => {
   const previous = previousPeriodReservations.value;
 
   // 현재 기간 매출
-  const currentRevenue = current.reduce((sum, r) => sum + (r.totalPrice || 0), 0);
+  const currentRevenue = current.reduce(
+    (sum, r) => sum + (r.totalPrice || 0),
+    0
+  );
   // 이전 기간 매출
-  const previousRevenue = previous.reduce((sum, r) => sum + (r.totalPrice || 0), 0);
+  const previousRevenue = previous.reduce(
+    (sum, r) => sum + (r.totalPrice || 0),
+    0
+  );
   // 매출 변화율
   const revenueChange =
-    previousRevenue > 0 ? Math.round(((currentRevenue - previousRevenue) / previousRevenue) * 100) : 0;
+    previousRevenue > 0
+      ? Math.round(((currentRevenue - previousRevenue) / previousRevenue) * 100)
+      : 0;
 
   // 현재 기간 이용객 수 (고유 고객)
   const currentUsers = new Set(current.map((r) => r.customerPhone)).size;
   // 이전 기간 이용객 수
   const previousUsers = new Set(previous.map((r) => r.customerPhone)).size;
   // 이용객 변화율
-  const usersChange = previousUsers > 0 ? Math.round(((currentUsers - previousUsers) / previousUsers) * 100) : 0;
+  const usersChange =
+    previousUsers > 0
+      ? Math.round(((currentUsers - previousUsers) / previousUsers) * 100)
+      : 0;
 
   // 이용률 계산 (예약 건수 / 전체 가능한 예약 수) - 간단히 예약 건수로 대체
   const currentUtilization = current.length;
   const previousUtilization = previous.length;
-  const utilizationRate = currentUtilization > 0 ? ((currentUtilization / 1000) * 100).toFixed(1) : 0;
+  const utilizationRate =
+    currentUtilization > 0 ? ((currentUtilization / 1000) * 100).toFixed(1) : 0;
   const utilizationChange =
-    previousUtilization > 0 ? (((currentUtilization - previousUtilization) / previousUtilization) * 100).toFixed(1) : 0;
+    previousUtilization > 0
+      ? (
+          ((currentUtilization - previousUtilization) / previousUtilization) *
+          100
+        ).toFixed(1)
+      : 0;
 
   return {
     revenue: currentRevenue,
@@ -818,22 +973,44 @@ const additionalMetrics = computed(() => {
 
   // 재방문율
   const currentReturning = current.filter((r) => r.isReturningCustomer).length;
-  const currentRevisitRate = current.length > 0 ? ((currentReturning / current.length) * 100).toFixed(1) : 0;
-  const previousReturning = previous.filter((r) => r.isReturningCustomer).length;
-  const previousRevisitRate = previous.length > 0 ? ((previousReturning / previous.length) * 100).toFixed(1) : 0;
+  const currentRevisitRate =
+    current.length > 0
+      ? ((currentReturning / current.length) * 100).toFixed(1)
+      : 0;
+  const previousReturning = previous.filter(
+    (r) => r.isReturningCustomer
+  ).length;
+  const previousRevisitRate =
+    previous.length > 0
+      ? ((previousReturning / previous.length) * 100).toFixed(1)
+      : 0;
   const revisitChange =
     parseFloat(previousRevisitRate) > 0
-      ? (parseFloat(currentRevisitRate) - parseFloat(previousRevisitRate)).toFixed(1)
+      ? (
+          parseFloat(currentRevisitRate) - parseFloat(previousRevisitRate)
+        ).toFixed(1)
       : 0;
 
   // 홈 배송 선택률
-  const currentDelivery = current.filter((r) => r.deliveryType === "배송").length;
-  const currentDeliveryRate = current.length > 0 ? ((currentDelivery / current.length) * 100).toFixed(1) : 0;
-  const previousDelivery = previous.filter((r) => r.deliveryType === "배송").length;
-  const previousDeliveryRate = previous.length > 0 ? ((previousDelivery / previous.length) * 100).toFixed(1) : 0;
+  const currentDelivery = current.filter(
+    (r) => r.deliveryType === "배송"
+  ).length;
+  const currentDeliveryRate =
+    current.length > 0
+      ? ((currentDelivery / current.length) * 100).toFixed(1)
+      : 0;
+  const previousDelivery = previous.filter(
+    (r) => r.deliveryType === "배송"
+  ).length;
+  const previousDeliveryRate =
+    previous.length > 0
+      ? ((previousDelivery / previous.length) * 100).toFixed(1)
+      : 0;
   const deliveryChange =
     parseFloat(previousDeliveryRate) > 0
-      ? (parseFloat(currentDeliveryRate) - parseFloat(previousDeliveryRate)).toFixed(1)
+      ? (
+          parseFloat(currentDeliveryRate) - parseFloat(previousDeliveryRate)
+        ).toFixed(1)
       : 0;
 
   return {
@@ -911,7 +1088,10 @@ const peakTimeData = computed(() => {
 
   // 기기 최대/최소값
   const storeMax = Math.max(...filteredStoreValues, 0);
-  const storeMin = Math.min(...filteredStoreValues.filter((v) => v > 0), storeMax);
+  const storeMin = Math.min(
+    ...filteredStoreValues.filter((v) => v > 0),
+    storeMax
+  );
 
   // 찾기 최대/최소값
   const findMax = Math.max(...filteredFindValues, 0);
@@ -971,7 +1151,10 @@ const eventTypeSales = computed(() => {
     typeMap[type].count += 1;
   });
 
-  const totalRevenue = Object.values(typeMap).reduce((sum, item) => sum + item.value, 0);
+  const totalRevenue = Object.values(typeMap).reduce(
+    (sum, item) => sum + item.value,
+    0
+  );
 
   // 이미지 색상 팔레트 사용 (오렌지 계열 중심)
   const colors = {
@@ -987,7 +1170,8 @@ const eventTypeSales = computed(() => {
       type: item.type,
       value: item.value,
       count: item.count,
-      percentage: totalRevenue > 0 ? Math.round((item.value / totalRevenue) * 100) : 0,
+      percentage:
+        totalRevenue > 0 ? Math.round((item.value / totalRevenue) * 100) : 0,
       color: colors[item.type] || colors["기타"],
     }))
     .sort((a, b) => b.value - a.value);
@@ -1000,7 +1184,9 @@ const maxEventValue = computed(() => {
 
 // 지역별 배송 (Top 3)
 const deliveryRegions = computed(() => {
-  const reservations = filteredReservations.value.filter((r) => r.deliveryType === "배송");
+  const reservations = filteredReservations.value.filter(
+    (r) => r.deliveryType === "배송"
+  );
   const regionMap = {};
 
   reservations.forEach((r) => {
@@ -1026,7 +1212,9 @@ const deliveryRegions = computed(() => {
 
 // 지역별 배송 히트맵 데이터
 const deliveryHeatmap = computed(() => {
-  const reservations = filteredReservations.value.filter((r) => r.deliveryType === "배송");
+  const reservations = filteredReservations.value.filter(
+    (r) => r.deliveryType === "배송"
+  );
   const regionMap = {};
 
   // JSON 파일의 deliveryRegionGroup을 그대로 사용 (이미 수정된 값)
@@ -1057,7 +1245,8 @@ const deliveryHeatmap = computed(() => {
     return {
       name: regionName,
       count: regionData ? regionData.count : 0,
-      percentage: total > 0 ? Math.round(((regionData?.count || 0) / total) * 100) : 0,
+      percentage:
+        total > 0 ? Math.round(((regionData?.count || 0) / total) * 100) : 0,
     };
   });
 
@@ -1240,15 +1429,21 @@ const insights = computed(() => {
   const insightList = [];
 
   if (utilizationRate < 5) {
-    insightList.push(`이용률 ${utilizationRate}%로 목표(5%) 미달 → 현장 마케팅 강화 필요`);
+    insightList.push(
+      `이용률 ${utilizationRate}%로 목표(5%) 미달 → 현장 마케팅 강화 필요`
+    );
   }
 
   if (topSize) {
-    insightList.push(`${topSize.size} 사이즈 집중 (${topSize.percentage}%) → 재고 관리 최적화`);
+    insightList.push(
+      `${topSize.size} 사이즈 집중 (${topSize.percentage}%) → 재고 관리 최적화`
+    );
   }
 
   if (deliveryRate > 15) {
-    insightList.push(`배송 신청 ${deliveryRate}% (증가 추세) → 배송 인프라 확대 검토`);
+    insightList.push(
+      `배송 신청 ${deliveryRate}% (증가 추세) → 배송 인프라 확대 검토`
+    );
   }
 
   if (insightList.length === 0) {
@@ -1284,8 +1479,12 @@ const createEventTypeChart = () => {
   }
 
   const isDark = document.documentElement.classList.contains("dark");
-  const gridColor = isDark ? "rgba(148, 163, 184, 0.1)" : "rgba(226, 232, 240, 1)";
-  const textColor = isDark ? "rgba(148, 163, 184, 1)" : "rgba(100, 116, 139, 1)";
+  const gridColor = isDark
+    ? "rgba(148, 163, 184, 0.1)"
+    : "rgba(226, 232, 240, 1)";
+  const textColor = isDark
+    ? "rgba(148, 163, 184, 1)"
+    : "rgba(100, 116, 139, 1)";
 
   eventTypeChart = new Chart(ctx, {
     type: "bar",
@@ -1295,7 +1494,9 @@ const createEventTypeChart = () => {
         {
           label: "매출",
           data: eventTypeSales.value.map((item) => item.value),
-          backgroundColor: eventTypeSales.value.map((item) => item.color + "CC"), // 투명도 추가
+          backgroundColor: eventTypeSales.value.map(
+            (item) => item.color + "CC"
+          ), // 투명도 추가
           borderColor: eventTypeSales.value.map((item) => item.color),
           borderWidth: 0,
           borderRadius: 8,
@@ -1312,15 +1513,23 @@ const createEventTypeChart = () => {
           display: false,
         },
         tooltip: {
-          backgroundColor: isDark ? "rgba(15, 23, 42, 0.9)" : "rgba(15, 23, 42, 0.9)",
+          backgroundColor: isDark
+            ? "rgba(15, 23, 42, 0.9)"
+            : "rgba(15, 23, 42, 0.9)",
           titleColor: "#fff",
           bodyColor: "#fff",
-          borderColor: isDark ? "rgba(148, 163, 184, 0.2)" : "rgba(148, 163, 184, 0.2)",
+          borderColor: isDark
+            ? "rgba(148, 163, 184, 0.2)"
+            : "rgba(148, 163, 184, 0.2)",
           borderWidth: 1,
           callbacks: {
             label: function (context) {
               const item = eventTypeSales.value[context.dataIndex];
-              return [`매출: ${formatNumber(item.value)}원`, `비율: ${item.percentage}%`, `건수: ${item.count || 0}건`];
+              return [
+                `매출: ${formatNumber(item.value)}원`,
+                `비율: ${item.percentage}%`,
+                `건수: ${item.count || 0}건`,
+              ];
             },
           },
         },
@@ -1374,8 +1583,12 @@ const createPeakTimeChart = () => {
   }
 
   const isDark = document.documentElement.classList.contains("dark");
-  const gridColor = isDark ? "rgba(148, 163, 184, 0.1)" : "rgba(226, 232, 240, 1)";
-  const textColor = isDark ? "rgba(148, 163, 184, 1)" : "rgba(100, 116, 139, 1)";
+  const gridColor = isDark
+    ? "rgba(148, 163, 184, 0.1)"
+    : "rgba(226, 232, 240, 1)";
+  const textColor = isDark
+    ? "rgba(148, 163, 184, 1)"
+    : "rgba(100, 116, 139, 1)";
 
   peakTimeChart = new Chart(ctx, {
     type: "line",
@@ -1421,10 +1634,14 @@ const createPeakTimeChart = () => {
           },
         },
         tooltip: {
-          backgroundColor: isDark ? "rgba(15, 23, 42, 0.9)" : "rgba(15, 23, 42, 0.9)",
+          backgroundColor: isDark
+            ? "rgba(15, 23, 42, 0.9)"
+            : "rgba(15, 23, 42, 0.9)",
           titleColor: "#fff",
           bodyColor: "#fff",
-          borderColor: isDark ? "rgba(148, 163, 184, 0.2)" : "rgba(148, 163, 184, 0.2)",
+          borderColor: isDark
+            ? "rgba(148, 163, 184, 0.2)"
+            : "rgba(148, 163, 184, 0.2)",
           borderWidth: 1,
           callbacks: {
             label: function (context) {
@@ -1479,7 +1696,9 @@ const createPaymentMethodChart = () => {
   }
 
   const isDark = document.documentElement.classList.contains("dark");
-  const textColor = isDark ? "rgba(148, 163, 184, 1)" : "rgba(100, 116, 139, 1)";
+  const textColor = isDark
+    ? "rgba(148, 163, 184, 1)"
+    : "rgba(100, 116, 139, 1)";
 
   paymentMethodChart = new Chart(ctx, {
     type: "bar",
@@ -1488,7 +1707,10 @@ const createPaymentMethodChart = () => {
       datasets: [
         {
           label: "결제 수단",
-          data: [paymentMethods.value.card.count, paymentMethods.value.other.count],
+          data: [
+            paymentMethods.value.card.count,
+            paymentMethods.value.other.count,
+          ],
           backgroundColor: ["#f59e0bCC", "#3b82f6CC"],
           borderColor: ["#f59e0b", "#3b82f6"],
           borderWidth: 0,
@@ -1506,17 +1728,28 @@ const createPaymentMethodChart = () => {
           display: false,
         },
         tooltip: {
-          backgroundColor: isDark ? "rgba(15, 23, 42, 0.9)" : "rgba(15, 23, 42, 0.9)",
+          backgroundColor: isDark
+            ? "rgba(15, 23, 42, 0.9)"
+            : "rgba(15, 23, 42, 0.9)",
           titleColor: "#fff",
           bodyColor: "#fff",
-          borderColor: isDark ? "rgba(148, 163, 184, 0.2)" : "rgba(148, 163, 184, 0.2)",
+          borderColor: isDark
+            ? "rgba(148, 163, 184, 0.2)"
+            : "rgba(148, 163, 184, 0.2)",
           borderWidth: 1,
           callbacks: {
             label: function (context) {
               const labels = ["카드", "기타"];
               const method = labels[context.dataIndex];
-              const data = method === "카드" ? paymentMethods.value.card : paymentMethods.value.other;
-              return [`${method}`, `건수: ${data.count}건`, `비율: ${data.percentage}%`];
+              const data =
+                method === "카드"
+                  ? paymentMethods.value.card
+                  : paymentMethods.value.other;
+              return [
+                `${method}`,
+                `건수: ${data.count}건`,
+                `비율: ${data.percentage}%`,
+              ];
             },
           },
         },
@@ -1561,7 +1794,9 @@ const createSizeRatioChart = () => {
   }
 
   const isDark = document.documentElement.classList.contains("dark");
-  const textColor = isDark ? "rgba(148, 163, 184, 1)" : "rgba(100, 116, 139, 1)";
+  const textColor = isDark
+    ? "rgba(148, 163, 184, 1)"
+    : "rgba(100, 116, 139, 1)";
 
   sizeRatioChart = new Chart(ctx, {
     type: "doughnut",
@@ -1585,15 +1820,23 @@ const createSizeRatioChart = () => {
           display: false,
         },
         tooltip: {
-          backgroundColor: isDark ? "rgba(15, 23, 42, 0.9)" : "rgba(15, 23, 42, 0.9)",
+          backgroundColor: isDark
+            ? "rgba(15, 23, 42, 0.9)"
+            : "rgba(15, 23, 42, 0.9)",
           titleColor: "#fff",
           bodyColor: "#fff",
-          borderColor: isDark ? "rgba(148, 163, 184, 0.2)" : "rgba(148, 163, 184, 0.2)",
+          borderColor: isDark
+            ? "rgba(148, 163, 184, 0.2)"
+            : "rgba(148, 163, 184, 0.2)",
           borderWidth: 1,
           callbacks: {
             label: function (context) {
               const item = sizeRatio.value[context.dataIndex];
-              return [`${item.size}`, `비율: ${item.percentage}%`, `건수: ${item.count}건`];
+              return [
+                `${item.size}`,
+                `비율: ${item.percentage}%`,
+                `건수: ${item.count}건`,
+              ];
             },
           },
         },
@@ -1608,15 +1851,24 @@ watch(
   () => {
     nextTick(() => {
       if (eventTypeChart) {
-        eventTypeChart.data.labels = eventTypeSales.value.map((item) => item.type);
-        eventTypeChart.data.datasets[0].data = eventTypeSales.value.map((item) => item.value);
-        eventTypeChart.data.datasets[0].backgroundColor = eventTypeSales.value.map((item) => item.color + "CC");
-        eventTypeChart.data.datasets[0].borderColor = eventTypeSales.value.map((item) => item.color);
+        eventTypeChart.data.labels = eventTypeSales.value.map(
+          (item) => item.type
+        );
+        eventTypeChart.data.datasets[0].data = eventTypeSales.value.map(
+          (item) => item.value
+        );
+        eventTypeChart.data.datasets[0].backgroundColor =
+          eventTypeSales.value.map((item) => item.color + "CC");
+        eventTypeChart.data.datasets[0].borderColor = eventTypeSales.value.map(
+          (item) => item.color
+        );
         eventTypeChart.update();
       }
 
       if (peakTimeChart) {
-        peakTimeChart.data.labels = peakTimeData.value.hours.map((h) => h + "시");
+        peakTimeChart.data.labels = peakTimeData.value.hours.map(
+          (h) => h + "시"
+        );
         peakTimeChart.data.datasets[0].data = peakTimeData.value.storeValues;
         peakTimeChart.data.datasets[1].data = peakTimeData.value.findValues;
         peakTimeChart.options.scales.y.max = 50;
@@ -1625,15 +1877,24 @@ watch(
       }
 
       if (paymentMethodChart) {
-        paymentMethodChart.data.datasets[0].data = [paymentMethods.value.card.count, paymentMethods.value.other.count];
+        paymentMethodChart.data.datasets[0].data = [
+          paymentMethods.value.card.count,
+          paymentMethods.value.other.count,
+        ];
         paymentMethodChart.update();
       }
 
       if (sizeRatioChart) {
         sizeRatioChart.data.labels = sizeRatio.value.map((item) => item.size);
-        sizeRatioChart.data.datasets[0].data = sizeRatio.value.map((item) => item.count);
-        sizeRatioChart.data.datasets[0].backgroundColor = sizeRatio.value.map((item) => item.color + "CC");
-        sizeRatioChart.data.datasets[0].borderColor = sizeRatio.value.map((item) => item.color);
+        sizeRatioChart.data.datasets[0].data = sizeRatio.value.map(
+          (item) => item.count
+        );
+        sizeRatioChart.data.datasets[0].backgroundColor = sizeRatio.value.map(
+          (item) => item.color + "CC"
+        );
+        sizeRatioChart.data.datasets[0].borderColor = sizeRatio.value.map(
+          (item) => item.color
+        );
         sizeRatioChart.update();
       }
     });
