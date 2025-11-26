@@ -80,7 +80,6 @@ const router = createRouter({
           path: "",
           name: "WorkerWork",
           component: () => import("../pages/worker/WorkerMain.vue"),
-          alias: "work", // 기존 /work 경로도 호환
           meta: { title: "작업자", role: "worker" },
         },
         {
