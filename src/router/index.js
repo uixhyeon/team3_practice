@@ -78,7 +78,7 @@ const router = createRouter({
       children: [
         {
           path: "",
-          redirect: "work",
+          redirect: "/worker/workerMain/work",
         },
         {
           path: "work",
@@ -124,7 +124,7 @@ const router = createRouter({
         }
         return authStore.userRole === "admin"
           ? "/admin/adminMain"
-          : "/worker/workerMain";
+          : "/worker/workerMain/work";
       },
     },
   ],
