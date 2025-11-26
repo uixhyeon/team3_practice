@@ -142,7 +142,7 @@ const goToCalendar = () => {
 };
 
 const goToPayment = () => {
-  router.push("/worker/workerMain/payment");
+  router.push({ name: "WorkerPayment" });
 };
 
 const goToEditProfile = () => {
