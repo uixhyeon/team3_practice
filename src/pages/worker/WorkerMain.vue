@@ -705,7 +705,7 @@ onMounted(() => {
   // 카카오 맵 스크립트 로드
   if (!window.kakao || !window.kakao.maps) {
     const script = document.createElement("script");
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_MAP_API_KEY&autoload=false`;
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${import.meta.env.VITE_KAKAO_MAP_APP_KEY}&autoload=false`;
     script.onload = () => {
       window.kakao.maps.load(() => {
         initMap();
