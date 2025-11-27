@@ -9,17 +9,17 @@
   ║ - 오늘 일정 및 위치 정보 표시                                        ║
   ║ - 카카오 맵 연동 및 네비게이션 실행                                  ║
   ║ - 예약 목록 관리 (진행중/완료)                                       ║
-  ║ - 바코드 스캔을 통한 예약 조회 및 완료 처리                          ║
-  ║                                                                      ║
-  ║ 주요 모달:                                                           ║
-  ║ 1. 진행 인원 모달: 남은 예약과 완료된 예약 목록 표시                 ║
-  ║ 2. 바코드 스캔 모달: 바코드/예약번호/전화번호로 예약 조회            ║
-  ║ 3. 주차장 사진 모달: 주차장 위치 사진 슬라이더                       ║
-  ║                                                                      ║
-  ║ 특징:                                                                ║
-  ║ - JSON 데이터 기반 실시간 예약 관리                                  ║
-  ║ - 카카오맵 API 연동                                                  ║
-  ║ - html5-qrcode 라이브러리 사용 바코드 스캔                           ║
+   ║ - 예약번호/전화번호로 예약 조회 및 완료 처리                          ║
+   ║                                                                      ║
+   ║ 주요 모달:                                                           ║
+   ║ 1. 진행 인원 모달: 남은 예약과 완료된 예약 목록 표시                 ║
+   ║ 2. 바코드 모달: 웹 카메라 연결 및 예약번호/전화번호로 예약 조회      ║
+   ║ 3. 주차장 사진 모달: 주차장 위치 사진 슬라이더                       ║
+   ║                                                                      ║
+   ║ 특징:                                                                ║
+   ║ - JSON 데이터 기반 실시간 예약 관리                                  ║
+   ║ - 카카오맵 API 연동                                                  ║
+   ║ - 웹 카메라 연결 (getUserMedia API 사용)                             ║
   ║ - 오늘 날짜 기준 예약 필터링                                         ║
   ║ - 행사 정보 자동 계산 (장소, 시간, 예약 인원)                        ║
   ╚══════════════════════════════════════════════════════════════════════╝
@@ -83,7 +83,7 @@
             @click="openKakaoNavigation"
             class="absolute bottom-4 right-4 bg-yellow-400 w-12 h-12 rounded-full flex items-center justify-center shadow-lg hover:bg-yellow-500 transition-colors z-10"
           >
-            <i class="fi fi-rr-navigation text-blue-600 text-xl"></i>
+            <i class="fi fi-rr-navigation text-blue-600 text-xl leading-none block"></i>
           </button>
         </div>
       </div>
@@ -206,8 +206,11 @@
                   >{{ reservation.id }}</span
                 >
               </div>
-              <div class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+              <div class="text-sm text-gray-600 dark:text-gray-400 mb-1">
                 {{ reservation.customerName }}
+              </div>
+              <div class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                {{ reservation.phone }}
               </div>
               <div class="flex justify-center">
                 <button
@@ -256,17 +259,20 @@
               >
                 <div class="mb-2">
                   <span
-                    class="text-sm font-bold text-gray-500 dark:text-gray-400"
+                    class="text-base text-gray-500 dark:text-gray-400"
                     >{{ reservation.id }}</span
                   >
                 </div>
-                <div class="text-sm text-gray-400 dark:text-gray-500 mb-3">
+                <div class="text-sm text-gray-400 dark:text-gray-500 mb-1">
                   {{ reservation.customerName }}
+                </div>
+                <div class="text-sm text-gray-400 dark:text-gray-500 mb-3">
+                  {{ reservation.phone }}
                 </div>
                 <div class="flex justify-center">
                   <button
                     @click="cancelCompleteReservation(reservation)"
-                    class="text-sm font-bold bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+                    class="text-sm bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
                   >
                     취소
                   </button>
@@ -308,12 +314,36 @@
           <div
             id="barcode-scanner"
             class="w-full h-full flex items-center justify-center"
-          ></div>
+          >
+            <!-- 카메라 비디오가 여기에 표시됩니다 -->
+          </div>
+
+          <!-- QR 스캔 영역 가이드 (항상 표시) -->
+          <div class="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
+            <div class="relative w-[250px] h-[250px]">
+              <!-- 외곽 반투명 배경 -->
+              <div class="absolute inset-0 bg-black/30"></div>
+              <!-- 모서리 코너 (기역자 모양) -->
+              <div class="absolute top-0 left-0 w-8 h-8 border-t-4 border-l-4 border-blue-500 rounded-tl-lg"></div>
+              <div class="absolute top-0 right-0 w-8 h-8 border-t-4 border-r-4 border-blue-500 rounded-tr-lg"></div>
+              <div class="absolute bottom-0 left-0 w-8 h-8 border-b-4 border-l-4 border-blue-500 rounded-bl-lg"></div>
+              <div class="absolute bottom-0 right-0 w-8 h-8 border-b-4 border-r-4 border-blue-500 rounded-br-lg"></div>
+            </div>
+          </div>
+
+          <!-- 카메라 비디오 -->
+          <video
+            v-if="isScanning"
+            ref="videoElement"
+            autoplay
+            playsinline
+            class="w-full h-full object-cover"
+          ></video>
 
           <!-- 스캔 안내 -->
           <div
             v-if="!isScanning"
-            class="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm"
+            class="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-sm z-10"
           >
             <div class="text-white text-center mb-4">
               <div
@@ -322,51 +352,25 @@
                 <i class="fi fi-rr-camera text-4xl text-blue-400"></i>
               </div>
               <p class="text-lg font-bold mb-2">카메라 권한이 필요합니다</p>
-              <p class="text-sm text-gray-300">바코드를 카메라에 맞춰주세요</p>
+              <p class="text-sm text-gray-300">카메라를 활성화해주세요</p>
             </div>
             <button
-              @click="startScanning"
+              @click="startCamera"
               class="bg-blue-600 text-white px-6 py-3 rounded-lg text-base hover:bg-blue-700 transition-colors"
             >
               카메라 시작
             </button>
           </div>
 
-          <!-- 스캔 중 표시 -->
+          <!-- 카메라 활성화 중 표시 -->
           <div
             v-if="isScanning"
             class="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 backdrop-blur-sm text-white px-5 py-2.5 rounded-full text-sm shadow-lg z-20"
           >
             <div class="flex items-center gap-2">
               <div class="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
-              바코드를 스캔 중...
+              카메라 활성화 중...
             </div>
-          </div>
-
-          <!-- 스캔 결과 -->
-          <div
-            v-if="scannedCode"
-            class="absolute top-4 left-4 right-4 bg-green-500 text-white p-4 rounded-xl shadow-lg z-20"
-          >
-            <div class="flex items-center gap-2 mb-2">
-              <i class="fi fi-rr-check-circle text-xl"></i>
-              <p class="text-base">스캔 완료!</p>
-            </div>
-            <p class="text-sm mb-3 bg-white/20 rounded-lg p-2 font-mono">
-              {{ scannedCode }}
-            </p>
-            <button
-              @click="handleScannedCode(scannedCode)"
-              class="w-full bg-white text-green-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition-colors mb-2"
-            >
-              조회하기
-            </button>
-            <button
-              @click="resetScan"
-              class="w-full bg-white/20 text-white px-4 py-2 rounded-lg text-sm hover:bg-white/30 transition-colors"
-            >
-              다시 스캔
-            </button>
           </div>
         </div>
 
@@ -377,7 +381,7 @@
               <button
                 @click="searchType = 'reservation'"
                 :class="[
-                  'flex-1 py-2.5 rounded-lg font-bold text-sm transition-colors',
+                  'flex-1 py-2.5 rounded-lg text-sm transition-colors',
                   searchType === 'reservation'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700',
@@ -388,7 +392,7 @@
               <button
                 @click="searchType = 'phone'"
                 :class="[
-                  'flex-1 py-2.5 rounded-lg font-bold text-sm transition-colors',
+                  'flex-1 py-2.5 rounded-lg text-sm transition-colors',
                   searchType === 'phone'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700',
@@ -483,73 +487,6 @@
       </div>
     </div>
 
-    <!-- 오늘 일정 모달 -->
-    <div
-      v-if="showScheduleModal"
-      class="fixed inset-0 z-50 bg-black/50 flex items-end justify-center px-4 pb-4"
-      @click.self="showScheduleModal = false"
-    >
-      <div
-        class="w-full max-w-[480px] bg-white rounded-t-3xl max-h-[85vh] overflow-y-auto shadow-2xl"
-      >
-        <div
-          class="sticky top-0 bg-white border-b border-gray-200 p-5 flex justify-between items-center rounded-t-3xl"
-        >
-          <h2 class="text-lg font-bold text-gray-900">오늘 일정</h2>
-          <button
-            @click="showScheduleModal = false"
-            class="text-gray-500 hover:text-gray-700 text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
-          >
-            ×
-          </button>
-        </div>
-        <div class="p-6">
-          <div class="mb-6">
-            <div class="text-2xl font-bold text-gray-900 mb-4">
-              {{ todaySchedule.title }}
-            </div>
-
-            <div class="space-y-3">
-              <div
-                class="flex justify-between items-center py-3 border-b border-gray-200"
-              >
-                <span class="text-sm text-gray-600">장소</span>
-                <span class="text-base text-gray-900">{{
-                  todaySchedule.location
-                }}</span>
-              </div>
-              <div
-                class="flex justify-between items-center py-3 border-b border-gray-200"
-              >
-                <span class="text-sm text-gray-600">운영 시간</span>
-                <span class="text-base text-gray-900"
-                  >{{ todaySchedule.operatingHours }} ({{
-                    todaySchedule.duration
-                  }})</span
-                >
-              </div>
-              <div
-                class="flex justify-between items-center py-3 border-b border-gray-200"
-              >
-                <span class="text-sm text-gray-600">예약 인원</span>
-                <span class="text-base text-gray-900"
-                  >{{ todaySchedule.bookedCapacity }}/{{
-                    todaySchedule.totalCapacity
-                  }}</span
-                >
-              </div>
-              <div class="flex justify-between items-center py-3">
-                <span class="text-sm text-gray-600">상태</span>
-                <span class="text-base text-gray-900">{{
-                  todaySchedule.status
-                }}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <!-- 주차장 사진 모달 -->
     <div
       v-if="showParkingModal"
@@ -624,11 +561,9 @@
 
 <script setup>
 import { ref, onUnmounted, watch, onMounted, nextTick, computed } from "vue";
-import { Html5Qrcode } from "html5-qrcode";
 import reservationsData from "@/data/reservations_2025_12.json";
 
-const currentLocation = ref("잠실실내체육관 남측 주차장");
-const arrivalTime = ref("16:30");
+// 위치와 도착 시간은 todaySchedule에서 계산됨
 
 const showParticipantsModal = ref(false);
 const showBarcodeModal = ref(false);
@@ -640,24 +575,34 @@ const searchInput = ref("");
 const selectedReservation = ref(null);
 
 // 진행인원 모달 관련
-// 오늘 날짜 확인
-const today = new Date();
-today.setHours(0, 0, 0, 0);
-const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+// 오늘 날짜 (computed로 만들어서 날짜가 바뀌면 자동 업데이트)
+const today = computed(() => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  return d;
+});
 
-// reservations_2025_11.json 데이터를 워커 페이지 형식으로 변환
-// 오늘 날짜의 예약만 필터링
-const reservations = ref(
-  reservationsData.reservations
+const todayStr = computed(() => {
+  const d = today.value;
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+});
+
+// 완료 상태 관리 (예약 ID를 키로 사용)
+const reservationStatusMap = ref(new Map());
+
+// reservations_2025_12.json 데이터를 워커 페이지 형식으로 변환
+// 오늘 날짜의 예약만 필터링 (computed로 만들어서 날짜가 바뀌면 자동 업데이트)
+const reservations = computed(() => {
+  return reservationsData.reservations
     .filter((r) => {
       // dropoffTime 또는 eventDate 기준으로 오늘 날짜 확인
       if (r.dropoffTime) {
         const dropoffDate = new Date(r.dropoffTime);
         const dropoffDateStr = `${dropoffDate.getFullYear()}-${String(dropoffDate.getMonth() + 1).padStart(2, "0")}-${String(dropoffDate.getDate()).padStart(2, "0")}`;
-        return dropoffDateStr === todayStr;
+        return dropoffDateStr === todayStr.value;
       }
       if (r.eventDate) {
-        return r.eventDate === todayStr;
+        return r.eventDate === todayStr.value;
       }
       return false;
     })
@@ -668,22 +613,21 @@ const reservations = ref(
         ? `${String(dropoffDate.getHours()).padStart(2, "0")}:${String(dropoffDate.getMinutes()).padStart(2, "0")}`
         : "";
 
-      // 모든 예약을 기본적으로 진행중으로 표시
-      // (워커가 확인하고 완료 처리할 수 있도록)
-      // 완료 버튼을 눌렀을 때만 완료 상태로 변경됨
+      // 완료 상태 확인 (기본값은 "scheduled")
+      const status = reservationStatusMap.value.get(r.id) || "scheduled";
+
       return {
         id: r.id,
         customerName: r.customerName,
         phone: r.customerPhone,
         address: r.deliveryAddress || r.eventVenue || "",
         time: timeStr,
-        // 기본적으로 진행중으로 표시 (워커가 완료 처리할 수 있도록)
-        status: "scheduled",
+        status: status,
         // 원본 데이터도 함께 저장 (추가 정보 표시용)
         original: r,
       };
-    })
-);
+    });
+});
 const selectedReservationForComplete = ref(null);
 
 // 진행중 예약 목록
@@ -757,24 +701,29 @@ const initMap = () => {
     const container = document.getElementById("kakao-map");
     if (!container || !window.kakao?.maps) return;
 
+    // 오늘 일정의 행사 장소에 맞는 좌표 가져오기
+    const venue = todaySchedule.value.venue;
+    const coordinates = venue && venue !== "-" 
+      ? (venueToCoordinates[venue] || venueToCoordinates["default"])
+      : venueToCoordinates["default"];
+
     const options = {
-      center: new window.kakao.maps.LatLng(37.5153, 127.1028), // 잠실실내체육관 좌표
+      center: new window.kakao.maps.LatLng(coordinates.lat, coordinates.lng),
       level: 3,
     };
 
     const map = new window.kakao.maps.Map(container, options);
 
     // 마커 생성
-    const markerPosition = new window.kakao.maps.LatLng(37.5153, 127.1028);
+    const markerPosition = new window.kakao.maps.LatLng(coordinates.lat, coordinates.lng);
     const marker = new window.kakao.maps.Marker({
       position: markerPosition,
     });
     marker.setMap(map);
 
-    // 인포윈도우 생성
+    // 인포윈도우 생성 (현재 위치 표시)
     const infowindow = new window.kakao.maps.InfoWindow({
-      content:
-        '<div style="padding:5px;font-size:12px;">잠실실내체육관 남측 주차장</div>',
+      content: `<div style="padding:5px;font-size:12px;">${currentLocation.value}</div>`,
     });
     infowindow.open(map, marker);
   });
@@ -811,36 +760,26 @@ const openKakaoNavigation = () => {
   }, 500);
 };
 
-// 바코드 스캔 관련
+// 카메라 관련
 const isScanning = ref(false);
-const scannedCode = ref("");
-let html5QrCode = null;
+const videoElement = ref(null);
+let stream = null;
 
-const startScanning = async () => {
+const startCamera = async () => {
   try {
     isScanning.value = true;
-    scannedCode.value = "";
 
-    html5QrCode = new Html5Qrcode("barcode-scanner");
+    // 카메라 스트림 가져오기
+    stream = await navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: "environment", // 후면 카메라 우선
+      },
+    });
 
-    // 카메라 시작
-    await html5QrCode.start(
-      { facingMode: "environment" }, // 후면 카메라 우선
-      {
-        fps: 10,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.0,
-      },
-      (decodedText, decodedResult) => {
-        // 바코드 스캔 성공
-        scannedCode.value = decodedText;
-        stopScanning();
-        handleScannedCode(decodedText);
-      },
-      (errorMessage) => {
-        // 스캔 중 에러 (일반적으로 무시)
-      }
-    );
+    // 비디오 요소에 스트림 연결
+    if (videoElement.value) {
+      videoElement.value.srcObject = stream;
+    }
   } catch (err) {
     console.error("카메라 시작 실패:", err);
     alert("카메라에 접근할 수 없습니다. 권한을 확인해주세요.");
@@ -848,31 +787,22 @@ const startScanning = async () => {
   }
 };
 
-const stopScanning = async () => {
-  if (html5QrCode) {
-    try {
-      await html5QrCode.stop();
-      await html5QrCode.clear();
-    } catch (err) {
-      console.error("스캔 중지 실패:", err);
-    }
-    html5QrCode = null;
+const stopCamera = () => {
+  if (stream) {
+    stream.getTracks().forEach((track) => track.stop());
+    stream = null;
+  }
+  if (videoElement.value) {
+    videoElement.value.srcObject = null;
   }
   isScanning.value = false;
 };
 
-const closeBarcodeModal = async () => {
-  await stopScanning();
-  scannedCode.value = "";
+const closeBarcodeModal = () => {
+  stopCamera();
   searchInput.value = "";
   selectedReservation.value = null;
   showBarcodeModal.value = false;
-};
-
-const resetScan = async () => {
-  scannedCode.value = "";
-  await stopScanning();
-  await startScanning();
 };
 
 // 예약번호/전화번호로 조회
@@ -905,93 +835,46 @@ const handleSearch = () => {
   }
 };
 
-// 바코드 스캔 결과 처리
-const handleScannedCode = (code) => {
-  console.log("스캔된 바코드:", code);
-  // 바코드가 예약번호인 경우
-  const found = reservations.value.find((r) => r.id === code);
-  if (found) {
-    selectedReservation.value = found;
-    searchInput.value = code;
-  } else {
-    alert("예약을 찾을 수 없습니다.");
-  }
-};
 
 // 완료 처리
 const completeReservation = () => {
   if (!selectedReservation.value) return;
 
-  const index = reservations.value.findIndex(
-    (r) => r.id === selectedReservation.value.id
-  );
-  if (index !== -1) {
-    reservations.value[index].status = "done";
-    alert("완료 처리되었습니다.");
-    selectedReservation.value = null;
-    searchInput.value = "";
-    closeBarcodeModal();
-  }
+  reservationStatusMap.value.set(selectedReservation.value.id, "done");
+  alert("완료 처리되었습니다.");
+  selectedReservation.value = null;
+  searchInput.value = "";
+  closeBarcodeModal();
 };
 
 // 완료 취소 처리
 const cancelCompleteReservation = (reservation) => {
-  const resIndex = reservations.value.findIndex((r) => r.id === reservation.id);
-  if (resIndex !== -1) {
-    reservations.value[resIndex].status = "scheduled";
-    if (reservations.value[resIndex].original) {
-      reservations.value[resIndex].original.status = "예약중";
-      reservations.value[resIndex].original.deliveryStatus = null;
-    }
-  }
+  reservationStatusMap.value.set(reservation.id, "scheduled");
   selectedReservationForComplete.value = null;
 };
 
 // 진행인원 모달에서 완료 처리
 const completeReservationFromList = (reservation) => {
   selectedReservationForComplete.value = reservation;
-  const resIndex = reservations.value.findIndex((r) => r.id === reservation.id);
-  if (resIndex !== -1) {
-    reservations.value[resIndex].status = "done";
-    if (reservations.value[resIndex].original) {
-      reservations.value[resIndex].original.status = "완료";
-      reservations.value[resIndex].original.deliveryStatus = "완료";
-    }
-  }
+  reservationStatusMap.value.set(reservation.id, "done");
 };
 
-// 모달이 열릴 때 카메라 시작, 닫힐 때 정리
-watch(showBarcodeModal, async (newVal) => {
-  if (newVal) {
-    // 모달이 열릴 때 약간의 딜레이 후 카메라 시작
-    await nextTick();
-    setTimeout(() => {
-      startScanning();
-    }, 300);
-  } else {
-    stopScanning();
+// 모달이 닫힐 때 카메라 정리
+watch(showBarcodeModal, (newVal) => {
+  if (!newVal) {
+    stopCamera();
   }
 });
 
 // 컴포넌트 언마운트 시 정리
 onUnmounted(() => {
-  stopScanning();
+  stopCamera();
 });
 
 // 오늘 일정 계산 (오늘 날짜의 예약 데이터 기반)
 const todaySchedule = computed(() => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
-
-  // 오늘 날짜의 예약들
-  const todayReservations = reservations.value.filter((r) => {
-    const reservationDate =
-      r.original?.eventDate || r.original?.dropoffTime?.split("T")[0];
-    return reservationDate === todayStr;
-  });
-
-  if (todayReservations.length === 0) {
+  // reservations는 이미 오늘 날짜로 필터링되어 있음
+  if (reservations.value.length === 0) {
     return {
       title: "오늘 예정된 행사가 없습니다",
       location: "-",
@@ -1000,12 +883,13 @@ const todaySchedule = computed(() => {
       bookedCapacity: 0,
       totalCapacity: 0,
       status: "없음",
+      venue: "-",
     };
   }
 
-  // 행사별로 그룹화
+  // 행사별로 그룹화 (같은 행사명, 같은 장소는 하나로)
   const eventsByVenue = {};
-  todayReservations.forEach((r) => {
+  reservations.value.forEach((r) => {
     const eventName = r.original?.eventName || "행사";
     const venue = r.original?.eventVenue || "-";
     const key = `${eventName}|${venue}`;
@@ -1048,6 +932,7 @@ const todaySchedule = computed(() => {
       bookedCapacity: 0,
       totalCapacity: 0,
       status: "없음",
+      venue: "-",
     };
   }
 
@@ -1092,18 +977,79 @@ const todaySchedule = computed(() => {
     operatingHours,
     duration,
     bookedCapacity: mainEvent.reservations.length,
-    totalCapacity: mainEvent.reservations.length, // 실제 예약 수를 총 용량으로 표시
+    totalCapacity: mainEvent.reservations.length,
     status,
-    venue: mainEvent.venue, // 행사 장소 정보 추가
+    venue: mainEvent.venue,
   };
 });
+
+// 행사 장소별 주차장 이름 매핑
+const venueToParkingName = {
+  "잠실실내체육관": "잠실실내체육관 남측 주차장",
+  "KSPO돔": "KSPO돔 주차장",
+  "올림픽공원": "올림픽공원 주차장",
+  "올림픽공원 올림픽홀": "올림픽공원 주차장",
+  // 다른 행사 장소도 추가 가능
+};
+
+// 행사 장소별 카카오맵 좌표 (위도, 경도)
+const venueToCoordinates = {
+  "잠실실내체육관": { lat: 37.5153, lng: 127.1028 },
+  "KSPO돔": { lat: 37.5219, lng: 127.1238 },
+  "올림픽공원": { lat: 37.5219, lng: 127.1238 },
+  "올림픽공원 올림픽홀": { lat: 37.5219, lng: 127.1238 },
+  // 기본값 (잠실실내체육관)
+  "default": { lat: 37.5153, lng: 127.1028 },
+};
 
 // 행사 장소별 주차장 주소 매핑
 const venueToParkingAddress = {
   "잠실실내체육관": "서울특별시 > 송파구 > 잠실동",
   "KSPO돔": "서울특별시 > 송파구 > 올림픽로",
+  "올림픽공원": "서울특별시 > 송파구 > 올림픽로",
   // 다른 행사 장소도 추가 가능
 };
+
+// 현재 위치 (오늘 일정의 행사 장소에 맞는 주차장)
+const currentLocation = computed(() => {
+  const venue = todaySchedule.value.venue;
+  if (!venue || venue === "-") {
+    return "잠실실내체육관 남측 주차장"; // 기본값
+  }
+  return venueToParkingName[venue] || `${venue} 주차장`; // 매핑이 없으면 장소명 + 주차장
+});
+
+// 도착 예정 시간 (이벤트 시작 시간 - 3시간)
+const arrivalTime = computed(() => {
+  // todaySchedule에서 이벤트 시작 시간 가져오기
+  if (reservations.value.length === 0) {
+    return "16:30"; // 기본값
+  }
+
+  // 행사별로 그룹화하여 가장 빠른 이벤트 시작 시간 찾기
+  let earliestStartTime = null;
+  reservations.value.forEach((r) => {
+    if (r.original?.eventStartTime) {
+      const startTime = new Date(r.original.eventStartTime);
+      if (!earliestStartTime || startTime < earliestStartTime) {
+        earliestStartTime = startTime;
+      }
+    }
+  });
+
+  if (!earliestStartTime) {
+    return "16:30"; // 기본값
+  }
+
+  // 이벤트 시작 시간에서 3시간 빼기
+  const arrivalDate = new Date(earliestStartTime);
+  arrivalDate.setHours(arrivalDate.getHours() - 3);
+
+  // 시간 포맷팅
+  const hours = String(arrivalDate.getHours()).padStart(2, "0");
+  const minutes = String(arrivalDate.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+});
 
 // 오늘 일정의 행사 장소에 맞는 주차장 주소
 const parkingLocationAddress = computed(() => {
@@ -1113,6 +1059,13 @@ const parkingLocationAddress = computed(() => {
   }
   return venueToParkingAddress[venue] || "서울특별시 > 송파구 > 잠실동"; // 매핑이 없으면 기본값
 });
+
+// todaySchedule이나 currentLocation이 변경되면 지도 업데이트
+watch([todaySchedule, currentLocation], () => {
+  if (window.kakao?.maps) {
+    initMap();
+  }
+}, { deep: true });
 
 const formatDate = (date) => {
   const weekdays = [

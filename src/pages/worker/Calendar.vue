@@ -25,18 +25,24 @@
     <div class="flex items-center justify-between mb-3 mx-4 mt-4">
       <button
         @click="prevMonth"
-        class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shrink-0 min-w-[60px] text-center"
+        class="p-2.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-center"
+        title="이전 달"
       >
-        이전
+        <i
+          class="fi fi-rr-angle-left text-2xl text-slate-700 dark:text-slate-300"
+        ></i>
       </button>
       <div class="text-lg font-bold text-gray-900 dark:text-white flex-1 text-center">
         {{ year }}년 {{ month + 1 }}월
       </div>
       <button
         @click="nextMonth"
-        class="px-4 py-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 shrink-0 min-w-[60px] text-center"
+        class="p-2.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-center"
+        title="다음 달"
       >
-        다음
+        <i
+          class="fi fi-rr-angle-right text-2xl text-slate-700 dark:text-slate-300"
+        ></i>
       </button>
     </div>
 
