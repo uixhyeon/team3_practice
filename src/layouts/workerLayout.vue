@@ -73,7 +73,7 @@ const goToHome = () => {
 };
 
 const goToProfile = () => {
-  router.push({ name: "WorkerProfile" });
+  router.push({ name: "WorkerSettings" });
 };
 
 const todayText = new Date().toLocaleDateString("ko-KR", {

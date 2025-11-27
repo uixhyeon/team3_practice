@@ -44,9 +44,9 @@
       >
         <span>{{ d.date.getDate() }}</span>
         <span
-          v-if="countJobs[d.key]"
+          v-if="countEvents[d.key]"
           class="mt-1 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
-          >{{ countJobs[d.key] }}건</span
+          >{{ countEvents[d.key] }}건</span
         >
       </div>
     </div>
@@ -72,86 +72,47 @@
 
     <!-- 일정리스트   if 일정이 없으면-->
     <div
-      v-if="filteredJobsSelected.length === 0"
+      v-if="filteredEventsSelected.length === 0"
       class="text-center text-gray-500 dark:text-gray-400 text-sm py-6 mx-4"
     >
       일정이 없습니다.
     </div>
     <ul class="space-y-2 mx-4">
       <li
-        v-for="job in filteredJobsSelected"
-        :key="job.id"
+        v-for="event in filteredEventsSelected"
+        :key="event.key"
         class="rounded-xl border border-gray-200 dark:border-gray-700 p-3 bg-white dark:bg-gray-800"
       >
         <div class="flex items-start gap-3">
           <div
-            class="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold"
-            :class="
-              job.type === 'luggage'
-                ? 'bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-300'
-                : 'bg-teal-100 dark:bg-teal-900/50 text-teal-700 dark:text-teal-300'
-            "
+            class="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
           >
-            {{ job.type === "luggage" ? "수" : "제" }}
+            행
           </div>
           <div class="flex-1 min-w-0">
             <p
               class="text-sm font-semibold truncate text-gray-900 dark:text-white"
             >
-              {{ job.customerName }}
-              <span class="text-gray-400 dark:text-gray-500" v-if="job.time">{{
-                job.time
-              }}</span>
+              {{ event.eventName }}
             </p>
             <p class="text-xs text-gray-600 dark:text-gray-400 truncate">
-              {{ job.address }}
+              {{ event.eventVenue }}
             </p>
-            <div
-              class="mt-1 text-xs text-gray-500 dark:text-gray-500"
-              v-if="job.original?.eventName"
-            >
-              {{ job.original.eventName }}
+            <div class="mt-1 text-xs text-gray-500 dark:text-gray-500">
+              {{ event.eventType }}
             </div>
             <div class="mt-2 flex items-center gap-1.5 flex-wrap">
               <span
-                class="text-[10px] px-1.5 py-0.5 rounded-full"
-                :class="
-                  job.status === 'done'
-                    ? 'bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300'
-                    : job.status === 'onroute'
-                      ? 'bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300'
-                      : job.status === 'working'
-                        ? 'bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300'
-                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
-                "
-                >{{ statusText(job.status) }}</span
+                class="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
+                >예약 고객: {{ event.bookedCustomerCount }}명</span
               >
               <span
+                v-if="event.operatingHours"
                 class="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
-                v-if="job.memo"
-                >메모: {{ job.memo }}</span
+                >{{ event.operatingHours }}</span
               >
             </div>
           </div>
-        </div>
-
-        <div class="mt-3 grid grid-cols-3 gap-2 text-xs">
-          <a
-            :href="`tel:${job.phone}`"
-            class="py-2 rounded-lg bg-blue-600 text-white text-center"
-            >전화</a
-          >
-          <a
-            :href="mapLink(job.address)"
-            class="py-2 rounded-lg bg-gray-100 text-gray-700 text-center"
-            >길찾기</a
-          >
-          <button
-            @click="advance(job)"
-            class="py-2 rounded-lg bg-yellow-500 text-white text-center"
-          >
-            상태변경
-          </button>
         </div>
       </li>
     </ul>
@@ -268,11 +229,59 @@ function nextMonth() {
   viewDate.value = new Date(year.value, month.value + 1, 1);
 }
 
-const countJobs = computed(() => {
+// 날짜별 행사 정보 계산
+const eventsByDate = computed(() => {
+  const eventsMap = {};
+  
+  // 예약 데이터를 날짜별로 그룹화하고 행사별로 집계
+  jobs.value.forEach((job) => {
+    if (!job.date) return;
+    
+    const eventName = job.original?.eventName || "행사";
+    const eventVenue = job.original?.eventVenue || "-";
+    const eventType = job.original?.eventType || "-";
+    const key = `${job.date}|${eventName}|${eventVenue}`;
+    
+    if (!eventsMap[key]) {
+      const eventStart = job.original?.eventStartTime
+        ? new Date(job.original.eventStartTime)
+        : null;
+      const eventEnd = job.original?.eventEndTime
+        ? new Date(job.original.eventEndTime)
+        : null;
+      
+      const formatTime = (date) => {
+        if (!date) return "";
+        return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+      };
+      
+      const startTime = formatTime(eventStart);
+      const endTime = formatTime(eventEnd);
+      const operatingHours = startTime && endTime ? `${startTime} ~ ${endTime}` : "";
+      
+      eventsMap[key] = {
+        date: job.date,
+        eventName,
+        eventVenue,
+        eventType,
+        operatingHours,
+        bookedCustomerCount: 0,
+        key,
+      };
+    }
+    eventsMap[key].bookedCustomerCount++;
+  });
+  
+  return eventsMap;
+});
+
+// 날짜별 행사 수 계산 (달력 표시용)
+const countEvents = computed(() => {
   const acc = {};
-  for (const j of jobs.value) {
-    if (j.date) {
-      acc[j.date] = (acc[j.date] || 0) + 1;
+  for (const key in eventsByDate.value) {
+    const event = eventsByDate.value[key];
+    if (event.date) {
+      acc[event.date] = (acc[event.date] || 0) + 1;
     }
   }
   return acc;
@@ -289,19 +298,21 @@ const selectedDateLabel = computed(() => {
   return `${d.getMonth() + 1}월${d.getDate()}일`;
 });
 
-// 작업 상태
-const jobsSelected = computed(() => {
+// 선택한 날짜의 행사 정보
+const eventsSelected = computed(() => {
   const key = fmtKey(selectedDate.value);
-  return jobs.value.filter((j) => {
-    return j.date === key;
-  });
+  const events = [];
+  for (const eventKey in eventsByDate.value) {
+    if (eventsByDate.value[eventKey].date === key) {
+      events.push(eventsByDate.value[eventKey]);
+    }
+  }
+  return events;
 });
 
-// 작업상태 필터링
-const filteredJobsSelected = computed(() => {
-  if (statusFilter.value === "all") return jobsSelected.value;
-
-  return jobsSelected.value.filter((j) => j.status === statusFilter.value);
+// 행사 필터링 (현재는 사용하지 않지만 구조 유지)
+const filteredEventsSelected = computed(() => {
+  return eventsSelected.value;
 });
 
 // 작업상태 글자 변경

@@ -1,205 +1,221 @@
 ㄱ
 <template>
   <div
-    class="p-4 bg-slate-50 dark:bg-slate-900 h-screen overflow-hidden"
+    class="p-4 bg-slate-50 dark:bg-slate-900 min-h-screen relative"
     @click="showCalendar = false"
   >
+
     <!-- 리포트 & 통계 헤더 -->
     <div class="mb-3">
       <!-- <h1 class="text-xl font-bold mb-3" style="color: #1e293b">리포트 & 통계</h1> -->
 
-      <!-- 날짜 범위 선택기와 액션 버튼 -->
-      <div class="flex justify-between items-start mb-4">
-        <!-- 날짜 범위 선택기 -->
-        <div class="flex-1 flex justify-center">
-          <div class="flex items-center gap-4 relative">
-            <button
-              @click="prevDateRange"
-              class="p-2.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-center"
-              title="이전 주"
-            >
-              <i
-                class="fi fi-rr-angle-left text-2xl text-slate-700 dark:text-slate-300"
-              ></i>
-            </button>
+      <!-- 날짜 범위 선택기 -->
+      <div class="flex justify-center mb-3">
+        <div class="flex items-center gap-4 relative">
+          <button
+            @click="prevDateRange"
+            class="p-2.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-center"
+            title="이전 주"
+          >
+            <i
+              class="fi fi-rr-angle-left text-2xl text-slate-700 dark:text-slate-300"
+            ></i>
+          </button>
+          <div
+            @click.stop="showCalendar = !showCalendar"
+            class="px-6 py-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex flex-col items-center text-center"
+          >
             <div
-              @click.stop="showCalendar = !showCalendar"
-              class="px-6 py-2 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors flex flex-col items-center text-center"
+              class="text-lg font-semibold text-slate-900 dark:text-slate-100"
+            >
+              {{ getWeekLabel(dateRange.start) }}
+            </div>
+            <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              {{ formatDateRange(dateRange.start) }} ~
+              {{ formatDateRange(dateRange.end) }}
+            </div>
+          </div>
+          <button
+            @click="nextDateRange"
+            class="p-2.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-center"
+            title="다음 주"
+          >
+            <i
+              class="fi fi-rr-angle-right text-2xl text-slate-700 dark:text-slate-300"
+            ></i>
+          </button>
+
+          <!-- 달력 모달 -->
+          <div
+            v-if="showCalendar"
+            class="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 z-50 border border-slate-200 dark:border-slate-700 min-w-[320px]"
+            @click.stop
+          >
+            <!-- 헤더 -->
+            <div class="flex items-center justify-between mb-6">
+              <button
+                @click="prevCalendarMonth"
+                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
+                title="이전 달"
+              >
+                <i class="fi fi-rr-angle-left text-lg"></i>
+              </button>
+              <div
+                class="text-lg font-bold text-slate-900 dark:text-white px-4"
+              >
+                {{ calendarYear }}년
+                {{ String(calendarMonth + 1).padStart(2, "0") }}월
+              </div>
+              <button
+                @click="nextCalendarMonth"
+                class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
+                title="다음 달"
+              >
+                <i class="fi fi-rr-angle-right text-lg"></i>
+              </button>
+            </div>
+
+            <!-- 요일 헤더 -->
+            <div class="grid grid-cols-7 gap-1 mb-2">
+              <div
+                v-for="day in ['일', '월', '화', '수', '목', '금', '토']"
+                :key="day"
+                :class="[
+                  'text-center text-xs font-semibold py-2',
+                  day === '일' ? 'text-red-500 dark:text-red-400' : '',
+                  day === '토' ? 'text-blue-500 dark:text-blue-400' : '',
+                  day !== '일' && day !== '토'
+                    ? 'text-slate-500 dark:text-slate-400'
+                    : '',
+                ]"
+              >
+                {{ day }}
+              </div>
+            </div>
+
+            <!-- 달력 그리드 -->
+            <div class="grid grid-cols-7 gap-0.5">
+              <div
+                v-for="d in calendarDays"
+                :key="d.key"
+                :class="[
+                  'aspect-square flex items-center justify-center text-sm cursor-pointer select-none transition-all duration-200 relative',
+                  d.outside
+                    ? 'text-slate-300 dark:text-slate-600'
+                    : isDateInRange(d.date)
+                      ? 'font-semibold text-white'
+                      : 'text-slate-700 dark:text-slate-200',
+                  // 주간의 첫 번째 날짜 (월요일)
+                  isDateInRange(d.date) && isWeekStart(d.date) && !d.outside
+                    ? 'rounded-l-xl'
+                    : '',
+                  // 주간의 마지막 날짜 (일요일)
+                  isDateInRange(d.date) && d.date.getDay() === 0 && !d.outside
+                    ? 'rounded-r-xl'
+                    : '',
+                  // 주간의 중간 날짜들
+                  isDateInRange(d.date) &&
+                  !isWeekStart(d.date) &&
+                  d.date.getDay() !== 0 &&
+                  !d.outside
+                    ? ''
+                    : '',
+                  // 선택되지 않은 날짜는 둥근 모서리
+                  !isDateInRange(d.date) && !d.outside ? 'rounded-xl' : '',
+                ]"
+                :style="
+                  isDateInRange(d.date) && !d.outside
+                    ? 'background-color: #3b82f6;'
+                    : ''
+                "
+                @click="selectWeekFromDate(d.date)"
+                @mouseenter="hoveredCalendarDate = d.date"
+                @mouseleave="hoveredCalendarDate = null"
+              >
+                <span :class="['relative z-10']">
+                  {{ d.date.getDate() }}
+                </span>
+                <!-- 오늘 표시 -->
+                <span
+                  v-if="isToday(d.date) && !isDateInRange(d.date)"
+                  class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full"
+                  style="background-color: #3b82f6"
+                ></span>
+              </div>
+            </div>
+
+            <!-- 선택된 주간 표시 -->
+            <div
+              v-if="dateRange"
+              class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700"
             >
               <div
-                class="text-lg font-semibold text-slate-900 dark:text-slate-100"
+                class="text-xs text-slate-500 dark:text-slate-400 text-center"
               >
-                {{ getWeekLabel(dateRange.start) }}
+                선택된 주간
               </div>
-              <div class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              <div
+                class="text-sm font-semibold text-slate-900 dark:text-white text-center mt-1"
+              >
                 {{ formatDateRange(dateRange.start) }} ~
                 {{ formatDateRange(dateRange.end) }}
               </div>
             </div>
-            <button
-              @click="nextDateRange"
-              class="p-2.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center justify-center"
-              title="다음 주"
-            >
-              <i
-                class="fi fi-rr-angle-right text-2xl text-slate-700 dark:text-slate-300"
-              ></i>
-            </button>
-
-            <!-- 달력 모달 -->
-            <div
-              v-if="showCalendar"
-              class="absolute top-full left-1/2 transform -translate-x-1/2 mt-3 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 z-50 border border-slate-200 dark:border-slate-700 min-w-[320px]"
-              @click.stop
-            >
-              <!-- 헤더 -->
-              <div class="flex items-center justify-between mb-6">
-                <button
-                  @click="prevCalendarMonth"
-                  class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
-                  title="이전 달"
-                >
-                  <i class="fi fi-rr-angle-left text-lg"></i>
-                </button>
-                <div
-                  class="text-lg font-bold text-slate-900 dark:text-white px-4"
-                >
-                  {{ calendarYear }}년
-                  {{ String(calendarMonth + 1).padStart(2, "0") }}월
-                </div>
-                <button
-                  @click="nextCalendarMonth"
-                  class="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition-colors"
-                  title="다음 달"
-                >
-                  <i class="fi fi-rr-angle-right text-lg"></i>
-                </button>
-              </div>
-
-              <!-- 요일 헤더 -->
-              <div class="grid grid-cols-7 gap-1 mb-2">
-                <div
-                  v-for="day in ['일', '월', '화', '수', '목', '금', '토']"
-                  :key="day"
-                  :class="[
-                    'text-center text-xs font-semibold py-2',
-                    day === '일' ? 'text-red-500 dark:text-red-400' : '',
-                    day === '토' ? 'text-blue-500 dark:text-blue-400' : '',
-                    day !== '일' && day !== '토'
-                      ? 'text-slate-500 dark:text-slate-400'
-                      : '',
-                  ]"
-                >
-                  {{ day }}
-                </div>
-              </div>
-
-              <!-- 달력 그리드 -->
-              <div class="grid grid-cols-7 gap-0.5">
-                <div
-                  v-for="d in calendarDays"
-                  :key="d.key"
-                  :class="[
-                    'aspect-square flex items-center justify-center text-sm cursor-pointer select-none transition-all duration-200 relative',
-                    d.outside
-                      ? 'text-slate-300 dark:text-slate-600'
-                      : isDateInRange(d.date)
-                        ? 'font-semibold text-white'
-                        : 'text-slate-700 dark:text-slate-200',
-                    // 주간의 첫 번째 날짜 (월요일)
-                    isDateInRange(d.date) && isWeekStart(d.date) && !d.outside
-                      ? 'rounded-l-xl'
-                      : '',
-                    // 주간의 마지막 날짜 (일요일)
-                    isDateInRange(d.date) && d.date.getDay() === 0 && !d.outside
-                      ? 'rounded-r-xl'
-                      : '',
-                    // 주간의 중간 날짜들
-                    isDateInRange(d.date) &&
-                    !isWeekStart(d.date) &&
-                    d.date.getDay() !== 0 &&
-                    !d.outside
-                      ? ''
-                      : '',
-                    // 선택되지 않은 날짜는 둥근 모서리
-                    !isDateInRange(d.date) && !d.outside ? 'rounded-xl' : '',
-                  ]"
-                  :style="
-                    isDateInRange(d.date) && !d.outside
-                      ? 'background-color: #3b82f6;'
-                      : ''
-                  "
-                  @click="selectWeekFromDate(d.date)"
-                  @mouseenter="hoveredCalendarDate = d.date"
-                  @mouseleave="hoveredCalendarDate = null"
-                >
-                  <span :class="['relative z-10']">
-                    {{ d.date.getDate() }}
-                  </span>
-                  <!-- 오늘 표시 -->
-                  <span
-                    v-if="isToday(d.date) && !isDateInRange(d.date)"
-                    class="absolute bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 rounded-full"
-                    style="background-color: #3b82f6"
-                  ></span>
-                </div>
-              </div>
-
-              <!-- 선택된 주간 표시 -->
-              <div
-                v-if="dateRange"
-                class="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700"
-              >
-                <div
-                  class="text-xs text-slate-500 dark:text-slate-400 text-center"
-                >
-                  선택된 주간
-                </div>
-                <div
-                  class="text-sm font-semibold text-slate-900 dark:text-white text-center mt-1"
-                >
-                  {{ formatDateRange(dateRange.start) }} ~
-                  {{ formatDateRange(dateRange.end) }}
-                </div>
-              </div>
-            </div>
           </div>
         </div>
+      </div>
+    </div>
 
-        <!-- 액션 버튼 (오른쪽 상단) -->
-        <div class="flex gap-2">
-          <button
-            class="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-1.5 text-xs"
-          >
-            <i class="fi fi-rr-download text-xs"></i>
-            PDF
-          </button>
-          <button
-            class="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg shadow-sm hover:shadow-md transition-all flex items-center gap-1.5 text-xs"
-          >
-            <i class="fi fi-rr-envelope text-xs"></i>
-            이메일
-          </button>
-        </div>
+    <!-- 운영 기간 안내 메시지 -->
+    <div
+      v-if="!isValidDateRange && filteredReservations.length === 0"
+      :class="[
+        'mb-4 p-4 rounded-xl border',
+        isBeforeNovember
+          ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+          : 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800'
+      ]"
+    >
+      <div class="flex items-center gap-2">
+        <i 
+          :class="[
+            'fi fi-rr-info',
+            isBeforeNovember
+              ? 'text-green-600 dark:text-green-400'
+              : 'text-blue-600 dark:text-blue-400'
+          ]"
+        ></i>
+        <p 
+          :class="[
+            'text-sm',
+            isBeforeNovember
+              ? 'text-green-800 dark:text-green-200'
+              : 'text-blue-800 dark:text-blue-200'
+          ]"
+        >
+          <span v-if="isBeforeNovember">아직 서비스가 오픈되지 않았습니다.</span>
+          <span v-else-if="isAfterNovember">이 기간은 운영 정보가 없습니다.</span>
+        </p>
       </div>
     </div>
 
     <!-- 왼쪽/오른쪽 2분할 레이아웃 -->
     <div
-      class="grid grid-cols-1 lg:grid-cols-2 gap-4 h-[calc(100vh-180px)] overflow-y-auto"
+      class="grid grid-cols-1 lg:grid-cols-2 gap-4"
     >
       <!-- 왼쪽 컬럼 -->
       <div class="space-y-3">
         <!-- 주요 지표 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
+          <h2 class="font-semibold mb-2" style="color: #1e293b; font-size: 18px;">
             주요 지표
           </h2>
           <div class="flex gap-3">
             <!-- 이용률 카드 -->
             <div
-              class="text-white p-3 rounded-2xl shadow-sm flex-1"
+              class="text-white rounded-2xl shadow-sm flex-1"
               style="
+                padding: 12px;
                 background: linear-gradient(
                   135deg,
                   rgba(34, 211, 238, 0.9),
@@ -207,13 +223,13 @@
                 );
               "
             >
-              <div class="text-center mb-2">
+              <div class="text-center mb-1">
                 <div>
-                  <div class="text-xs font-medium opacity-90">이용률</div>
-                  <div class="text-lg sm:text-xl font-bold mt-1">
+                  <div class="font-medium opacity-90" style="font-size: 18px;">이용률</div>
+                  <div class="font-bold mt-0.5" style="font-size: 28px;">
                     {{ keyMetrics.utilizationRate }}%
                   </div>
-                  <div class="text-xs mt-1 text-red-200">
+                  <div class="mt-0.5 text-red-200" style="font-size: 18px;">
                     <i class="fi fi-rr-arrow-down mr-1"></i
                     >{{ Math.abs(keyMetrics.utilizationChange) }}%
                   </div>
@@ -223,8 +239,9 @@
 
             <!-- 재방문율 카드 -->
             <div
-              class="text-white p-3 rounded-2xl shadow-sm flex-1"
+              class="text-white rounded-2xl shadow-sm flex-1"
               style="
+                padding: 12px;
                 background: linear-gradient(
                   135deg,
                   rgba(34, 197, 94, 0.9),
@@ -232,13 +249,13 @@
                 );
               "
             >
-              <div class="text-center mb-2">
+              <div class="text-center mb-1">
                 <div>
-                  <div class="text-xs font-medium opacity-90">재방문율</div>
-                  <div class="text-lg sm:text-xl font-bold mt-1">
+                  <div class="font-medium opacity-90" style="font-size: 18px;">재방문율</div>
+                  <div class="font-bold mt-0.5" style="font-size: 28px;">
                     {{ additionalMetrics.revisitRate }}%
                   </div>
-                  <div class="text-xs mt-1 text-green-200">
+                  <div class="mt-0.5 text-green-200" style="font-size: 18px;">
                     <i class="fi fi-rr-arrow-up mr-1"></i
                     >{{ additionalMetrics.revisitChange }}%
                   </div>
@@ -246,10 +263,11 @@
               </div>
             </div>
 
-            <!-- 홈 배송 선택률 카드 -->
+            <!-- 배송선택률 카드 -->
             <div
-              class="text-white p-3 rounded-2xl shadow-sm flex-1"
+              class="text-white rounded-2xl shadow-sm flex-1"
               style="
+                padding: 12px;
                 background: linear-gradient(
                   135deg,
                   rgba(251, 191, 36, 0.9),
@@ -257,15 +275,15 @@
                 );
               "
             >
-              <div class="text-center mb-2">
+              <div class="text-center mb-1">
                 <div>
-                  <div class="text-xs font-medium opacity-90">
-                    홈 배송 선택률
+                  <div class="font-medium opacity-90" style="font-size: 18px;">
+                  배송선택률
                   </div>
-                  <div class="text-lg sm:text-xl font-bold mt-1">
+                  <div class="font-bold mt-0.5" style="font-size: 28px;">
                     {{ additionalMetrics.deliveryRate }}%
                   </div>
-                  <div class="text-xs mt-1 text-green-200">
+                  <div class="mt-0.5 text-green-200" style="font-size: 18px;">
                     <i class="fi fi-rr-arrow-up mr-1"></i
                     >{{ additionalMetrics.deliveryChange }}%
                   </div>
@@ -275,12 +293,13 @@
           </div>
         </section>
 
-        <!-- 재방문율 & 홈 배송 선택률 카드 -->
+        <!-- 재방문율 & 배송선택률 카드 -->
         <div class="flex gap-3">
           <!-- 매출 카드 -->
           <div
-            class="text-white p-3 rounded-2xl shadow-sm flex-1"
+            class="text-white rounded-2xl shadow-sm flex-1"
             style="
+              padding: 12px;
               background: linear-gradient(
                 135deg,
                 rgba(96, 165, 250, 0.9),
@@ -288,13 +307,13 @@
               );
             "
           >
-            <div class="text-center mb-2">
+            <div class="text-center mb-1">
               <div>
-                <div class="text-xs font-medium opacity-90">매출</div>
-                <div class="text-lg sm:text-xl font-bold mt-1">
+                <div class="font-medium opacity-90" style="font-size: 18px;">매출</div>
+                <div class="font-bold mt-0.5" style="font-size: 28px;">
                   {{ formatCurrency(keyMetrics.revenue) }}
                 </div>
-                <div class="text-xs mt-1 text-green-200">
+                <div class="mt-0.5 text-green-200" style="font-size: 18px;">
                   <i class="fi fi-rr-arrow-up mr-1"></i
                   >{{ keyMetrics.revenueChange }}%
                 </div>
@@ -304,8 +323,9 @@
 
           <!-- 이용객 카드 -->
           <div
-            class="text-white p-3 rounded-2xl shadow-sm flex-1"
+            class="text-white rounded-2xl shadow-sm flex-1"
             style="
+              padding: 12px;
               background: linear-gradient(
                 135deg,
                 rgba(107, 114, 128, 0.9),
@@ -313,13 +333,13 @@
               );
             "
           >
-            <div class="text-center mb-2">
+            <div class="text-center mb-1">
               <div>
-                <div class="text-xs font-medium opacity-90">이용객</div>
-                <div class="text-lg sm:text-xl font-bold mt-1">
+                <div class="font-medium opacity-90" style="font-size: 18px;">이용객</div>
+                <div class="font-bold mt-0.5" style="font-size: 28px;">
                   {{ formatNumber(keyMetrics.users) }}명
                 </div>
-                <div class="text-xs mt-1 text-green-200">
+                <div class="mt-0.5 text-green-200" style="font-size: 18px;">
                   <i class="fi fi-rr-arrow-up mr-1"></i
                   >{{ keyMetrics.usersChange }}%
                 </div>
@@ -329,7 +349,7 @@
         </div>
         <!-- 행사 유형별 매출 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
+          <h2 class="font-semibold mb-2" style="color: #1e293b; font-size: 18px;">
             행사 유형별 매출
           </h2>
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3">
@@ -351,7 +371,7 @@
 
         <!-- 사이즈별 비율 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
+          <h2 class="font-semibold mb-2" style="color: #1e293b; font-size: 18px;">
             사이즈별 비율
           </h2>
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3">
@@ -383,9 +403,24 @@
       <div class="space-y-3">
         <!-- 피크타임 분석 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
-            피크타임 분석
-          </h2>
+          <div class="flex justify-between items-center mb-2">
+            <h2 class="font-semibold" style="color: #1e293b; font-size: 18px;">
+              피크타임 분석
+            </h2>
+            <select
+              v-model="selectedEventTypeForPeakTime"
+              class="px-3 py-1.5 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg shadow-sm border border-slate-200 dark:border-slate-600 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px] w-[120px]"
+            >
+              <option value="">전체</option>
+              <option
+                v-for="eventType in availableEventTypes"
+                :key="eventType"
+                :value="eventType"
+              >
+                {{ eventType }}
+              </option>
+            </select>
+          </div>
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3">
             <div class="h-40">
               <canvas ref="peakTimeChartRef"></canvas>
@@ -395,27 +430,27 @@
 
         <!-- 지역별 배송 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
+          <h2 class="font-semibold mb-2" style="color: #1e293b; font-size: 18px;">
             지역별 배송
           </h2>
           <div
-            class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3 overflow-hidden"
+            class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3 overflow-x-auto"
           >
             <!-- 히트맵과 Top 3를 나란히 배치 (큰 화면) -->
-            <div class="flex flex-col lg:flex-row gap-3 items-start">
+            <div class="flex flex-col lg:flex-row gap-3 items-start min-w-0">
               <!-- 히트맵 스타일 지도 -->
               <div
-                class="flex flex-col items-center gap-2 flex-1 w-full min-w-0"
+                class="flex flex-col items-center gap-2 flex-1 w-full min-w-0 overflow-x-auto"
               >
                 <!-- 1행: 서북권, 동북권 -->
-                <div class="flex justify-center gap-2 w-full">
+                <div class="flex justify-center gap-2 w-full flex-wrap">
                   <div
                     v-if="deliveryHeatmap[0]"
                     :class="[
                       getHeatmapColor(deliveryHeatmap[0].count || 0),
                       getHeatmapTextColor(deliveryHeatmap[0].count || 0),
                     ]"
-                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    class="h-20 w-24 sm:w-28 min-w-20 sm:min-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[9px] sm:text-[10px] px-1 relative shadow-sm"
                     @click="selectRegion(deliveryHeatmap[0])"
                     @mouseenter="
                       (e) => {
@@ -427,10 +462,10 @@
                     "
                     @mouseleave="hoveredRegion = null"
                   >
-                    <div class="font-bold text-sm">
+                    <div class="font-bold text-xs sm:text-sm">
                       {{ deliveryHeatmap[0].name }}
                     </div>
-                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                    <div class="text-[8px] sm:text-[9px] mt-1 opacity-75 leading-tight">
                       {{ getRegionDescription(deliveryHeatmap[0].name) }}
                     </div>
                   </div>
@@ -440,7 +475,7 @@
                       getHeatmapColor(deliveryHeatmap[1].count || 0),
                       getHeatmapTextColor(deliveryHeatmap[1].count || 0),
                     ]"
-                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    class="h-20 w-24 sm:w-28 min-w-20 sm:min-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[9px] sm:text-[10px] px-1 relative shadow-sm"
                     @click="selectRegion(deliveryHeatmap[1])"
                     @mouseenter="
                       (e) => {
@@ -452,24 +487,24 @@
                     "
                     @mouseleave="hoveredRegion = null"
                   >
-                    <div class="font-bold text-sm">
+                    <div class="font-bold text-xs sm:text-sm">
                       {{ deliveryHeatmap[1].name }}
                     </div>
-                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                    <div class="text-[8px] sm:text-[9px] mt-1 opacity-75 leading-tight">
                       {{ getRegionDescription(deliveryHeatmap[1].name) }}
                     </div>
                   </div>
                 </div>
 
                 <!-- 2행: 서남권, 도심권, 동남권 -->
-                <div class="flex justify-center gap-2 w-full">
+                <div class="flex justify-center gap-2 w-full flex-wrap">
                   <div
                     v-if="deliveryHeatmap[2]"
                     :class="[
                       getHeatmapColor(deliveryHeatmap[2].count || 0),
                       getHeatmapTextColor(deliveryHeatmap[2].count || 0),
                     ]"
-                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    class="h-20 w-24 sm:w-28 min-w-20 sm:min-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[9px] sm:text-[10px] px-1 relative shadow-sm"
                     @click="selectRegion(deliveryHeatmap[2])"
                     @mouseenter="
                       (e) => {
@@ -481,10 +516,10 @@
                     "
                     @mouseleave="hoveredRegion = null"
                   >
-                    <div class="font-bold text-sm">
+                    <div class="font-bold text-xs sm:text-sm">
                       {{ deliveryHeatmap[2].name }}
                     </div>
-                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                    <div class="text-[8px] sm:text-[9px] mt-1 opacity-75 leading-tight">
                       {{ getRegionDescription(deliveryHeatmap[2].name) }}
                     </div>
                   </div>
@@ -494,7 +529,7 @@
                       getHeatmapColor(deliveryHeatmap[3].count || 0),
                       getHeatmapTextColor(deliveryHeatmap[3].count || 0),
                     ]"
-                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    class="h-20 w-24 sm:w-28 min-w-20 sm:min-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[9px] sm:text-[10px] px-1 relative shadow-sm"
                     @click="selectRegion(deliveryHeatmap[3])"
                     @mouseenter="
                       (e) => {
@@ -506,10 +541,10 @@
                     "
                     @mouseleave="hoveredRegion = null"
                   >
-                    <div class="font-bold text-sm">
+                    <div class="font-bold text-xs sm:text-sm">
                       {{ deliveryHeatmap[3].name }}
                     </div>
-                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                    <div class="text-[8px] sm:text-[9px] mt-1 opacity-75 leading-tight">
                       {{ getRegionDescription(deliveryHeatmap[3].name) }}
                     </div>
                   </div>
@@ -519,7 +554,7 @@
                       getHeatmapColor(deliveryHeatmap[4].count || 0),
                       getHeatmapTextColor(deliveryHeatmap[4].count || 0),
                     ]"
-                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    class="h-20 w-24 sm:w-28 min-w-20 sm:min-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[9px] sm:text-[10px] px-1 relative shadow-sm"
                     @click="selectRegion(deliveryHeatmap[4])"
                     @mouseenter="
                       (e) => {
@@ -531,24 +566,24 @@
                     "
                     @mouseleave="hoveredRegion = null"
                   >
-                    <div class="font-bold text-sm">
+                    <div class="font-bold text-xs sm:text-sm">
                       {{ deliveryHeatmap[4].name }}
                     </div>
-                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                    <div class="text-[8px] sm:text-[9px] mt-1 opacity-75 leading-tight">
                       {{ getRegionDescription(deliveryHeatmap[4].name) }}
                     </div>
                   </div>
                 </div>
 
                 <!-- 3행: 인천&경기, 지방 -->
-                <div class="flex justify-center gap-2 w-full">
+                <div class="flex justify-center gap-2 w-full flex-wrap">
                   <div
                     v-if="deliveryHeatmap[5]"
                     :class="[
                       getHeatmapColor(deliveryHeatmap[5].count || 0),
                       getHeatmapTextColor(deliveryHeatmap[5].count || 0),
                     ]"
-                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    class="h-20 w-24 sm:w-28 min-w-20 sm:min-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[9px] sm:text-[10px] px-1 relative shadow-sm"
                     @click="selectRegion(deliveryHeatmap[5])"
                     @mouseenter="
                       (e) => {
@@ -560,10 +595,10 @@
                     "
                     @mouseleave="hoveredRegion = null"
                   >
-                    <div class="font-bold text-sm">
+                    <div class="font-bold text-xs sm:text-sm">
                       {{ deliveryHeatmap[5].name }}
                     </div>
-                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                    <div class="text-[8px] sm:text-[9px] mt-1 opacity-75 leading-tight">
                       {{ getRegionDescription(deliveryHeatmap[5].name) }}
                     </div>
                   </div>
@@ -573,7 +608,7 @@
                       getHeatmapColor(deliveryHeatmap[6].count || 0),
                       getHeatmapTextColor(deliveryHeatmap[6].count || 0),
                     ]"
-                    class="h-20 w-28 min-w-28 max-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[10px] px-1 relative shadow-sm"
+                    class="h-20 w-24 sm:w-28 min-w-20 sm:min-w-28 flex-shrink-0 rounded-2xl flex flex-col items-center justify-center font-semibold cursor-pointer hover:opacity-90 hover:scale-105 transition-all text-center text-[9px] sm:text-[10px] px-1 relative shadow-sm"
                     @click="selectRegion(deliveryHeatmap[6])"
                     @mouseenter="
                       (e) => {
@@ -585,10 +620,10 @@
                     "
                     @mouseleave="hoveredRegion = null"
                   >
-                    <div class="font-bold text-sm">
+                    <div class="font-bold text-xs sm:text-sm">
                       {{ deliveryHeatmap[6].name }}
                     </div>
-                    <div class="text-[9px] mt-1 opacity-75 leading-tight">
+                    <div class="text-[8px] sm:text-[9px] mt-1 opacity-75 leading-tight">
                       {{ getRegionDescription(deliveryHeatmap[6].name) }}
                     </div>
                   </div>
@@ -655,7 +690,7 @@
 
         <!-- 인사이트 -->
         <section>
-          <h2 class="text-base font-semibold mb-2" style="color: #1e293b">
+          <h2 class="font-semibold mb-2" style="color: #1e293b; font-size: 18px;">
             인사이트
           </h2>
           <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm p-3">
@@ -676,6 +711,22 @@
             </div>
           </div>
         </section>
+
+        <!-- 액션 버튼 (인사이트 카드 아래) -->
+        <div class="flex justify-end gap-2 mt-3">
+          <button
+            class="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg shadow-sm transition-all flex items-center gap-1.5 text-xs"
+          >
+            <i class="fi fi-rr-download text-xs"></i>
+            PDF
+          </button>
+          <button
+            class="px-3 py-1.5 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg shadow-sm transition-all flex items-center gap-1.5 text-xs"
+          >
+            <i class="fi fi-rr-envelope text-xs"></i>
+            이메일
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -966,7 +1017,7 @@ const keyMetrics = computed(() => {
   };
 });
 
-// 추가 지표 계산 (재방문율, 홈 배송 선택률)
+// 추가 지표 계산 (재방문율, 배송선택률)
 const additionalMetrics = computed(() => {
   const current = filteredReservations.value;
   const previous = previousPeriodReservations.value;
@@ -991,7 +1042,7 @@ const additionalMetrics = computed(() => {
         ).toFixed(1)
       : 0;
 
-  // 홈 배송 선택률
+  // 배송선택률
   const currentDelivery = current.filter(
     (r) => r.deliveryType === "배송"
   ).length;
@@ -1040,6 +1091,9 @@ const regionTooltipPosition = ref({ x: 0, y: 0 });
 // 호버된 행사 유형
 const hoveredEventType = ref(null);
 
+// 피크타임 분석용 선택된 행사 유형
+const selectedEventTypeForPeakTime = ref("");
+
 // Chart.js refs
 const eventTypeChartRef = ref(null);
 const peakTimeChartRef = ref(null);
@@ -1050,9 +1104,54 @@ let peakTimeChart = null;
 let paymentMethodChart = null;
 let sizeRatioChart = null;
 
+// 사용 가능한 행사 유형 목록
+const availableEventTypes = computed(() => {
+  const reservations = filteredReservations.value;
+  const types = new Set();
+  reservations.forEach((r) => {
+    const type = r.eventType || "기타";
+    types.add(type);
+  });
+  return Array.from(types).sort();
+});
+
+// 운영 기간 확인 (2025년 11월)
+const isValidDateRange = computed(() => {
+  const start = dateRange.value.start;
+  const end = dateRange.value.end;
+  
+  // 2025년 11월 1일 ~ 11월 30일
+  const serviceStartDate = new Date(2025, 10, 1); // 2025-11-01
+  const serviceEndDate = new Date(2025, 10, 30); // 2025-11-30
+  
+  // 선택된 기간이 운영 기간 내에 있는지 확인
+  return start >= serviceStartDate && end <= serviceEndDate;
+});
+
+// 11월 이전인지 확인
+const isBeforeNovember = computed(() => {
+  const end = dateRange.value.end;
+  const serviceStartDate = new Date(2025, 10, 1); // 2025-11-01
+  return end < serviceStartDate;
+});
+
+// 11월 이후인지 확인
+const isAfterNovember = computed(() => {
+  const start = dateRange.value.start;
+  const serviceEndDate = new Date(2025, 10, 30); // 2025-11-30
+  return start > serviceEndDate;
+});
+
 // 피크타임 분석 데이터
 const peakTimeData = computed(() => {
-  const reservations = filteredReservations.value;
+  let reservations = filteredReservations.value;
+  
+  // 선택된 행사 유형으로 필터링
+  if (selectedEventTypeForPeakTime.value) {
+    reservations = reservations.filter(
+      (r) => (r.eventType || "기타") === selectedEventTypeForPeakTime.value
+    );
+  }
 
   // 전체 시간대 (0-23시) 또는 데이터가 있는 시간대만
   const allHours = Array.from({ length: 24 }, (_, i) => i);
@@ -1596,7 +1695,7 @@ const createPeakTimeChart = () => {
       labels: peakTimeData.value.hours.map((h) => h + "시"),
       datasets: [
         {
-          label: "기기(store)",
+          label: "맡기기",
           data: peakTimeData.value.storeValues,
           borderColor: "#3b82f6",
           backgroundColor: "rgba(59, 130, 246, 0.1)",
@@ -1606,7 +1705,7 @@ const createPeakTimeChart = () => {
           pointHoverRadius: 6,
         },
         {
-          label: "찾기(find)",
+          label: "찾기",
           data: peakTimeData.value.findValues,
           borderColor: "#22c55e",
           backgroundColor: "rgba(34, 197, 94, 0.1)",
@@ -1845,9 +1944,18 @@ const createSizeRatioChart = () => {
   });
 };
 
+// 주차 변경 시 피크타임 분석 셀렉트 초기화
+watch(
+  () => dateRange.value,
+  () => {
+    selectedEventTypeForPeakTime.value = "";
+  },
+  { deep: true }
+);
+
 // 데이터 변경 시 차트 업데이트
 watch(
-  [eventTypeSales, peakTimeData, paymentMethods, sizeRatio],
+  [eventTypeSales, peakTimeData, paymentMethods, sizeRatio, selectedEventTypeForPeakTime],
   () => {
     nextTick(() => {
       if (eventTypeChart) {

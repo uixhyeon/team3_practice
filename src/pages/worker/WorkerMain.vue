@@ -21,7 +21,7 @@
         {{ currentLocation }}
       </div>
       <div class="border-t border-dashed border-gray-300 pt-3">
-        <div class="text-sm text-gray-600">{{ arrivalTime }} 도착</div>
+        <div class="text-base text-gray-700">{{ arrivalTime }} 도착 예정</div>
       </div>
     </div>
 
@@ -39,11 +39,7 @@
           >
             <div class="flex items-center gap-2">
               <i class="fi fi-rr-marker text-blue-600"></i>
-              <div class="text-xs">
-                <div class="font-semibold">주변</div>
-                <div class="text-gray-600">서울특별시 > 송파구 > 잠실동</div>
-                <div class="text-gray-500">13°C</div>
-              </div>
+              <div class="text-xs text-gray-600">{{ parkingLocationAddress }}</div>
             </div>
           </div>
 
@@ -71,9 +67,9 @@
       <!-- 진행 인원 버튼 -->
       <button
         @click="showParticipantsModal = true"
-        class="flex-1 bg-white rounded-2xl shadow-sm p-5 text-left hover:shadow-md transition-shadow"
+        class="flex-1 bg-white rounded-2xl shadow-sm p-5 text-left transition-shadow"
       >
-        <div class="text-sm text-gray-600 mb-2">진행 인원</div>
+        <div class="text-sm text-gray-600 mb-2">남은 예약</div>
         <div class="text-2xl font-bold text-blue-600">
           {{ currentParticipants }}/{{ totalCapacity }}
         </div>
@@ -91,14 +87,16 @@
     <!-- 오늘 일정 카드 -->
     <button
       @click="showScheduleModal = true"
-      class="w-full mx-4 mt-4 bg-white rounded-2xl shadow-sm p-5 text-left hover:shadow-md transition-shadow"
+      class="block w-[calc(100%-2rem)] mx-4 mt-4 bg-white rounded-2xl shadow-sm p-5 text-left transition-shadow"
     >
-      <div class="text-lg font-semibold text-gray-900 mb-4">오늘 일정</div>
-
-      <div class="border-t border-dashed border-gray-300 pt-4">
-        <div class="text-base font-semibold text-gray-900 mb-3">
+      <div class="flex justify-between items-center mb-4">
+        <div class="text-lg font-semibold text-gray-900">오늘 일정</div>
+        <div class="text-base font-semibold text-gray-900">
           {{ todaySchedule.title }}
         </div>
+      </div>
+
+      <div class="border-t border-dashed border-gray-300 pt-4">
 
         <div class="space-y-2 text-sm text-gray-600">
           <div class="flex justify-between">
@@ -261,7 +259,7 @@
     >
       <div class="w-full max-w-[480px] bg-black mx-auto h-full flex flex-col">
         <div
-          class="sticky top-0 bg-black/90 backdrop-blur-sm border-b border-gray-700 p-5 flex justify-between items-center z-10"
+          class="sticky top-0 bg-gray-900 border-b border-gray-700 p-5 flex justify-between items-center z-10"
         >
           <h2 class="text-xl font-bold text-white">바코드 스캔</h2>
           <button
@@ -528,7 +526,7 @@
       <div class="w-full max-w-[480px] h-full bg-black mx-auto flex flex-col">
         <!-- 헤더 -->
         <div
-          class="sticky top-0 bg-black/90 backdrop-blur-sm border-b border-gray-700 p-5 flex justify-between items-center z-10"
+          class="sticky top-0 bg-gray-900 border-b border-gray-700 p-5 flex justify-between items-center z-10"
         >
           <h2 class="text-xl font-bold text-white">주차장 위치</h2>
           <button
@@ -597,7 +595,7 @@ import { Html5Qrcode } from "html5-qrcode";
 import reservationsData from "@/data/reservations_2025_12.json";
 
 const currentLocation = ref("잠실실내체육관 남측 주차장");
-const arrivalTime = ref("16:30분");
+const arrivalTime = ref("16:30");
 
 // 네비게이션 출발지 (필요에 따라 변경 가능)
 const navigationOrigin = ref("서울시 강남구");
@@ -704,12 +702,20 @@ const prevImage = () => {
 onMounted(() => {
   // 카카오 맵 스크립트 로드
   if (!window.kakao || !window.kakao.maps) {
+    const kakaoApiKey = import.meta.env.VITE_KAKAO_MAP_API_KEY;
+    if (!kakaoApiKey) {
+      console.error("카카오맵 API 키가 설정되지 않았습니다. VITE_KAKAO_MAP_API_KEY 환경 변수를 설정해주세요.");
+      return;
+    }
     const script = document.createElement("script");
-    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_MAP_API_KEY&autoload=false`;
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoApiKey}&autoload=false`;
     script.onload = () => {
       window.kakao.maps.load(() => {
         initMap();
       });
+    };
+    script.onerror = () => {
+      console.error("카카오맵 스크립트를 로드할 수 없습니다.");
     };
     document.head.appendChild(script);
   } else {
@@ -1041,7 +1047,24 @@ const todaySchedule = computed(() => {
     bookedCapacity: mainEvent.reservations.length,
     totalCapacity: mainEvent.reservations.length, // 실제 예약 수를 총 용량으로 표시
     status,
+    venue: mainEvent.venue, // 행사 장소 정보 추가
   };
+});
+
+// 행사 장소별 주차장 주소 매핑
+const venueToParkingAddress = {
+  "잠실실내체육관": "서울특별시 > 송파구 > 잠실동",
+  "KSPO돔": "서울특별시 > 송파구 > 올림픽로",
+  // 다른 행사 장소도 추가 가능
+};
+
+// 오늘 일정의 행사 장소에 맞는 주차장 주소
+const parkingLocationAddress = computed(() => {
+  const venue = todaySchedule.value.venue;
+  if (!venue || venue === "-") {
+    return "서울특별시 > 송파구 > 잠실동"; // 기본값
+  }
+  return venueToParkingAddress[venue] || "서울특별시 > 송파구 > 잠실동"; // 매핑이 없으면 기본값
 });
 
 const formatDate = (date) => {

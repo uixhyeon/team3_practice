@@ -32,7 +32,7 @@
         <div class="mt-4 text-right">
           <button
             @click="goToEditProfile"
-            class="text-blue-600 text-sm font-medium hover:underline"
+            class="text-blue-600 text-sm font-medium"
           >
             내정보 수정 >
           </button>
@@ -41,14 +41,8 @@
 
       <!-- 일정 정보 카드 -->
       <div class="bg-white rounded-2xl shadow-sm mt-4 p-5">
-        <div class="flex items-center justify-between mb-3">
-          <div class="text-lg font-semibold text-gray-900">일정 정보</div>
-          <button
-            @click="goToCalendar"
-            class="text-blue-600 text-sm font-medium hover:underline"
-          >
-            전체 보기 >
-          </button>
+        <div class="text-lg font-semibold text-gray-900 mb-3">
+          전체 운영 일정
         </div>
 
         <div class="space-y-3">
@@ -70,54 +64,60 @@
               >{{ monthScheduleCount }}건</span
             >
           </div>
+          <div class="flex justify-end mt-2">
+            <button
+              @click="goToCalendar"
+              class="text-blue-600 text-sm font-medium"
+            >
+              자세히 보기 >
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- 이번달 운영 현황 카드 -->
+      <!-- 기사 급여 카드 -->
       <div class="bg-white rounded-2xl shadow-sm mt-4 p-5">
-        <div class="text-lg font-semibold text-gray-900 mb-4">
-          이번달 운영 현황
+        <div class="text-lg font-semibold text-gray-900 mb-3">
+          내 급여 현황
         </div>
 
         <div class="space-y-3">
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">총 운행 일수</span>
+            <span class="text-sm text-gray-600">오늘</span>
             <span class="text-base font-semibold text-gray-900"
-              >{{ monthlyStats.totalDays }}일</span
+              >-원</span
             >
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">총 운영 시간</span>
+            <span class="text-sm text-gray-600">이번 주</span>
             <span class="text-base font-semibold text-gray-900"
-              >{{ monthlyStats.totalHours }}시간</span
+              >-원</span
             >
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">예상 급여</span>
+            <span class="text-sm text-gray-600">이번 달</span>
             <span class="text-base font-semibold text-gray-900"
-              >{{ formatCurrency(monthlyStats.estimatedSalary) }}원</span
+              >-원</span
             >
           </div>
-        </div>
-
-        <!-- 정산 상세 링크 -->
-        <div class="mt-4">
-          <button
-            @click="goToPayment"
-            class="w-full text-blue-600 text-sm font-medium hover:bg-blue-50 dark:hover:bg-blue-900/20 py-2 px-3 rounded-lg transition-colors text-center cursor-pointer"
-          >
-            정산 상세 보기 >
-          </button>
+          <div class="flex justify-end mt-2">
+            <button
+              class="text-blue-600 text-sm font-medium"
+            >
+              자세히 보기 >
+            </button>
+          </div>
         </div>
       </div>
 
       <!-- 로그아웃 버튼 -->
-      <div class="mt-4 mb-4">
+      <div class="mt-4 mb-4 flex justify-end">
         <button
           @click="handleLogout"
-          class="w-full bg-red-500 text-white py-3 rounded-xl font-semibold hover:bg-red-600 transition-colors"
+          class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all flex items-center gap-2 border border-gray-200 dark:border-gray-700"
         >
-          로그아웃
+          <i class="fi fi-rr-sign-out-alt"></i>
+          <span>로그아웃</span>
         </button>
       </div>
     </div>
@@ -141,10 +141,6 @@ const goToCalendar = () => {
   router.push({ name: "WorkerCalendar" });
 };
 
-const goToPayment = () => {
-  router.push({ name: "WorkerPayment" });
-};
-
 const goToEditProfile = () => {
   router.push({ name: "WorkerEditProfile" });
 };
@@ -165,29 +161,80 @@ const userInfo = ref({
   profileImage: null,
 });
 
-// 일정 통계 계산
+// 일정 통계 계산 (Calendar.vue와 동일한 방식)
 const today = new Date();
 today.setHours(0, 0, 0, 0);
-const todayKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
-// 예약 데이터를 날짜 기준으로 변환
-const reservations = computed(() => {
+// 날짜 key 포맷 함수 (Calendar.vue와 동일)
+function fmtKey(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+// 예약 데이터를 jobs 형식으로 변환 (Calendar.vue와 동일)
+const jobs = computed(() => {
   return reservationsData.reservations.map((r) => {
-    const eventDate =
-      r.eventDate || (r.dropoffTime ? r.dropoffTime.split("T")[0] : null);
+    // dropoffTime에서 시간 추출
+    const dropoffDate = r.dropoffTime ? new Date(r.dropoffTime) : null;
+    const timeStr = dropoffDate
+      ? `${String(dropoffDate.getHours()).padStart(2, "0")}:${String(dropoffDate.getMinutes()).padStart(2, "0")}`
+      : "";
+
     return {
-      ...r,
-      date: eventDate,
+      id: r.id,
+      date: r.eventDate || (r.dropoffTime ? r.dropoffTime.split("T")[0] : ""),
+      type: r.itemType === "식품(상온)" ? "ice" : "luggage",
+      customerName: r.customerName,
+      time: timeStr,
+      address: r.deliveryAddress || r.eventVenue || "",
+      phone: r.customerPhone,
+      status: r.status === "완료" || r.deliveryStatus === "완료" ? "done" : r.deliveryStatus === "배송중" ? "onroute" : "scheduled",
+      memo: r.specialRequest || "",
+      original: r,
     };
   });
 });
 
-// 오늘 일정 수
-const todayScheduleCount = computed(() => {
-  return reservations.value.filter((r) => r.date === todayKey).length;
+// 날짜별 행사 정보 계산 (Calendar.vue와 동일한 방식)
+const eventsByDate = computed(() => {
+  const eventsMap = {};
+  
+  // 예약 데이터를 날짜별로 그룹화하고 행사별로 집계
+  jobs.value.forEach((job) => {
+    if (!job.date) return;
+    
+    const eventName = job.original?.eventName || "행사";
+    const eventVenue = job.original?.eventVenue || "-";
+    const key = `${job.date}|${eventName}|${eventVenue}`;
+    
+    if (!eventsMap[key]) {
+      eventsMap[key] = {
+        date: job.date,
+        eventName,
+        eventVenue,
+        key,
+      };
+    }
+  });
+  
+  return eventsMap;
 });
 
-// 이번 주 일정 수
+// 오늘 일정 수 (행사 건수)
+const todayScheduleCount = computed(() => {
+  const todayKey = fmtKey(today);
+  let count = 0;
+  for (const key in eventsByDate.value) {
+    if (eventsByDate.value[key].date === todayKey) {
+      count++;
+    }
+  }
+  return count;
+});
+
+// 이번 주 일정 수 (행사 건수)
 const weekScheduleCount = computed(() => {
   const weekStart = new Date(today);
   weekStart.setDate(today.getDate() - today.getDay()); // 이번 주 일요일
@@ -195,79 +242,36 @@ const weekScheduleCount = computed(() => {
   weekEnd.setDate(weekStart.getDate() + 6); // 이번 주 토요일
   weekEnd.setHours(23, 59, 59, 999);
 
-  return reservations.value.filter((r) => {
-    if (!r.date) return false;
-    const jobDate = new Date(r.date);
-    jobDate.setHours(0, 0, 0, 0);
-    return jobDate >= weekStart && jobDate <= weekEnd;
-  }).length;
+  let count = 0;
+  for (const key in eventsByDate.value) {
+    const event = eventsByDate.value[key];
+    if (!event.date) continue;
+    const eventDate = new Date(event.date);
+    eventDate.setHours(0, 0, 0, 0);
+    if (eventDate >= weekStart && eventDate <= weekEnd) {
+      count++;
+    }
+  }
+  return count;
 });
 
-// 이번 달 일정 수
+// 이번 달 일정 수 (행사 건수)
 const monthScheduleCount = computed(() => {
   const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
   const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
   monthEnd.setHours(23, 59, 59, 999);
 
-  return reservations.value.filter((r) => {
-    if (!r.date) return false;
-    const jobDate = new Date(r.date);
-    jobDate.setHours(0, 0, 0, 0);
-    return jobDate >= monthStart && jobDate <= monthEnd;
-  }).length;
-});
-
-// 이번달 운영 현황 계산
-const monthlyStats = computed(() => {
-  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  monthEnd.setHours(23, 59, 59, 999);
-
-  // 이번 달 예약들
-  const monthReservations = reservations.value.filter((r) => {
-    if (!r.date) return false;
-    const jobDate = new Date(r.date);
-    jobDate.setHours(0, 0, 0, 0);
-    return jobDate >= monthStart && jobDate <= monthEnd;
-  });
-
-  // 운행 일수 계산 (고유한 날짜 수)
-  const uniqueDates = new Set();
-  monthReservations.forEach((r) => {
-    if (r.date) {
-      uniqueDates.add(r.date);
+  let count = 0;
+  for (const key in eventsByDate.value) {
+    const event = eventsByDate.value[key];
+    if (!event.date) continue;
+    const eventDate = new Date(event.date);
+    eventDate.setHours(0, 0, 0, 0);
+    if (eventDate >= monthStart && eventDate <= monthEnd) {
+      count++;
     }
-  });
-  const totalDays = uniqueDates.size;
-
-  // 총 운영 시간 계산 (행사 시간 합계)
-  let totalMinutes = 0;
-  monthReservations.forEach((r) => {
-    if (r.eventStartTime && r.eventEndTime) {
-      const start = new Date(r.eventStartTime);
-      const end = new Date(r.eventEndTime);
-      const diff = end.getTime() - start.getTime();
-      const minutes = Math.floor(diff / (1000 * 60));
-      totalMinutes += minutes;
-    }
-  });
-  const totalHours = Math.round(totalMinutes / 60);
-
-  // 예상 급여 계산 (예약당 평균 20,000원 가정, 또는 실제 totalPrice 합계)
-  const estimatedSalary = monthReservations.reduce((sum, r) => {
-    // 운전사 급여는 예약 금액의 일정 비율로 계산 (예: 30%)
-    const driverFee = r.totalPrice ? Math.round(r.totalPrice * 0.3) : 20000;
-    return sum + driverFee;
-  }, 0);
-
-  return {
-    totalDays,
-    totalHours,
-    estimatedSalary,
-  };
+  }
+  return count;
 });
-
-const formatCurrency = (amount) => {
-  return amount.toLocaleString("ko-KR");
-};
 </script>
+
