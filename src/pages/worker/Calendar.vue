@@ -29,7 +29,7 @@
       >
         이전
       </button>
-      <div class="text-base font-semibold text-gray-900 dark:text-white flex-1 text-center">
+      <div class="text-lg font-bold text-gray-900 dark:text-white flex-1 text-center">
         {{ year }}년 {{ month + 1 }}월
       </div>
       <button
@@ -41,7 +41,7 @@
     </div>
 
     <!-- 요일 헤더 -->
-    <div class="grid grid-cols-7 text-center text-xs text-gray-500 dark:text-gray-400 mb-1 mx-4">
+    <div class="grid grid-cols-7 text-center text-sm text-gray-600 dark:text-gray-400 mb-1 mx-4">
       <div>일</div>
       <div>월</div>
       <div>화</div>
@@ -63,7 +63,7 @@
         <span>{{ d.date.getDate() }}</span>
         <span
           v-if="countEvents[d.key]"
-          class="mt-1 text-[10px] px-1.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
+          class="mt-1 text-sm px-1.5 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300"
         >
           {{ countEvents[d.key] }}건
         </span>
@@ -88,20 +88,20 @@
         class="rounded-xl border border-gray-200 dark:border-gray-700 p-3 bg-white dark:bg-gray-800"
       >
         <div class="flex items-start gap-3">
-          <div class="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+          <div class="w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
             행
           </div>
           <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold truncate text-gray-900 dark:text-white">{{ event.eventName }}</p>
-            <p class="text-xs text-gray-600 dark:text-gray-400 truncate">{{ event.eventVenue }}</p>
-            <div class="mt-1 text-xs text-gray-500 dark:text-gray-500">{{ event.eventType }}</div>
+            <p class="text-base truncate text-gray-900 dark:text-white">{{ event.eventName }}</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 truncate">{{ event.eventVenue }}</p>
+            <div class="mt-1 text-sm text-gray-600 dark:text-gray-500">{{ event.eventType }}</div>
             <div class="mt-2 flex items-center gap-1.5 flex-wrap">
-              <span class="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
+              <span class="text-sm px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300">
                 예약 고객: {{ event.bookedCustomerCount }}명
               </span>
               <span
                 v-if="event.operatingHours"
-                class="text-[10px] px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
+                class="text-sm px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400"
               >
                 {{ event.operatingHours }}
               </span>

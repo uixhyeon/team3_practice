@@ -24,7 +24,7 @@
     <div class="px-4 py-4">
       <!-- 프로필 정보 카드 -->
       <div class="bg-white rounded-2xl shadow-sm p-5">
-        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-4">
           <div class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
             <img v-if="userInfo.profileImage" :src="userInfo.profileImage" alt="프로필" class="w-full h-full object-cover" />
             <span v-else class="text-3xl text-gray-400">👤</span>
@@ -36,7 +36,7 @@
           </div>
         </div>
         <div class="mt-4 text-right">
-          <button @click="goToEditProfile" class="text-blue-600 text-sm font-bold">내정보 수정 ></button>
+          <button @click="goToEditProfile" class="text-blue-600 text-sm">내정보 수정 ></button>
         </div>
       </div>
 
@@ -46,18 +46,18 @@
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">오늘 행사</span>
-            <span class="text-base font-bold text-gray-900">{{ todayScheduleCount }}건</span>
+            <span class="text-base text-gray-900">{{ todayScheduleCount }}건</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 주 행사</span>
-            <span class="text-base font-bold text-gray-900">{{ weekScheduleCount }}건</span>
+            <span class="text-base text-gray-900">{{ weekScheduleCount }}건</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 달 행사</span>
-            <span class="text-base font-bold text-gray-900">{{ monthScheduleCount }}건</span>
+            <span class="text-base text-gray-900">{{ monthScheduleCount }}건</span>
           </div>
           <div class="flex justify-end mt-2">
-            <button @click="goToCalendar" class="text-blue-600 text-sm font-bold">자세히 보기 ></button>
+            <button @click="goToCalendar" class="text-blue-600 text-sm">자세히 보기 ></button>
           </div>
         </div>
       </div>
@@ -68,18 +68,18 @@
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">오늘</span>
-            <span class="text-base font-bold text-gray-900">-원</span>
+            <span class="text-base text-gray-900">{{ formatCurrency(todaySalary) }}원</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 주</span>
-            <span class="text-base font-bold text-gray-900">-원</span>
+            <span class="text-base text-gray-900">{{ formatCurrency(weekSalary) }}원</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 달</span>
-            <span class="text-base font-bold text-gray-900">-원</span>
+            <span class="text-base text-gray-900">{{ formatCurrency(monthSalary) }}원</span>
           </div>
           <div class="flex justify-end mt-2">
-            <button @click="goToSalaryDetail" class="text-blue-600 text-sm font-bold">자세히 보기 ></button>
+            <button @click="goToSalaryDetail" class="text-blue-600 text-sm">자세히 보기 ></button>
           </div>
         </div>
       </div>
@@ -88,7 +88,7 @@
       <div class="mt-4 mb-4 flex justify-end">
         <button
           @click="handleLogout"
-          class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:shadow-md transition-all flex items-center gap-2 border border-gray-200 dark:border-gray-700"
+          class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-2 rounded-lg text-sm shadow-sm hover:shadow-md transition-all flex items-center gap-2 border border-gray-200 dark:border-gray-700"
         >
           <i class="fi fi-rr-sign-out-alt"></i>
           <span>로그아웃</span>
@@ -185,4 +185,101 @@ const monthScheduleCount = computed(() => {
     return eventDate >= monthStart && eventDate <= monthEnd;
   }).length;
 });
+
+// 급여 계산 로직
+const HOURLY_WAGE = 20000; // 시급 20,000원
+
+// 근무시간 계산 (행사 시간 + 6시간)
+const calculateWorkHours = (eventStartTime, eventEndTime) => {
+  if (!eventStartTime || !eventEndTime) return 0;
+  
+  const start = new Date(eventStartTime);
+  const end = new Date(eventEndTime);
+  
+  // 행사 시간
+  const eventDuration = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+  // 행사 시간 + 6시간
+  return eventDuration + 6;
+};
+
+// 급여 계산
+const calculateSalary = (workHours) => {
+  return Math.round(workHours * HOURLY_WAGE);
+};
+
+// 급여 내역 계산 (같은 날짜, 같은 행사는 하나로 묶음)
+const salaryDetails = computed(() => {
+  const eventMap = {}; // 날짜 + 행사명 + 장소를 키로 사용
+  
+  reservationsData.reservations.forEach((r) => {
+    if (r.eventStartTime && r.eventEndTime) {
+      const eventDate = r.eventDate || (r.dropoffTime ? r.dropoffTime.split("T")[0] : null);
+      
+      if (eventDate) {
+        // 같은 날짜, 같은 행사명, 같은 장소는 하나의 행사로 취급
+        const eventKey = `${eventDate}|${r.eventName || "행사"}|${r.eventVenue || "-"}`;
+        
+        if (!eventMap[eventKey]) {
+          const workHours = calculateWorkHours(r.eventStartTime, r.eventEndTime);
+          const salary = calculateSalary(workHours);
+          const date = new Date(eventDate);
+          
+          eventMap[eventKey] = {
+            date: eventDate,
+            dateObj: date,
+            salary: salary,
+          };
+        }
+      }
+    }
+  });
+  
+  return Object.values(eventMap);
+});
+
+// 오늘 급여
+const todaySalary = computed(() => {
+  const todayStr = today.toISOString().split("T")[0];
+  return salaryDetails.value
+    .filter((item) => item.date === todayStr)
+    .reduce((sum, item) => sum + item.salary, 0);
+});
+
+// 이번 주 급여
+const weekSalary = computed(() => {
+  const weekStart = new Date(today);
+  weekStart.setDate(today.getDate() - today.getDay());
+  weekStart.setHours(0, 0, 0, 0);
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  return salaryDetails.value
+    .filter((item) => {
+      const eventDate = item.dateObj;
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate >= weekStart && eventDate <= weekEnd;
+    })
+    .reduce((sum, item) => sum + item.salary, 0);
+});
+
+// 이번 달 급여
+const monthSalary = computed(() => {
+  const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+  const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+  monthEnd.setHours(23, 59, 59, 999);
+
+  return salaryDetails.value
+    .filter((item) => {
+      const eventDate = item.dateObj;
+      eventDate.setHours(0, 0, 0, 0);
+      return eventDate >= monthStart && eventDate <= monthEnd;
+    })
+    .reduce((sum, item) => sum + item.salary, 0);
+});
+
+// 통화 포맷
+const formatCurrency = (amount) => {
+  return amount.toLocaleString("ko-KR");
+};
 </script>

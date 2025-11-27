@@ -44,11 +44,11 @@
 
     <!-- 위치 정보 카드 -->
     <div class="bg-white rounded-2xl shadow-sm mx-4 p-5">
-      <div class="text-base text-gray-700 mb-3">
+      <div class="text-base text-gray-900 mb-3">
         {{ currentLocation }}
       </div>
       <div class="border-t border-dashed border-gray-300 pt-3">
-        <div class="text-base text-gray-700">{{ arrivalTime }} 도착 예정</div>
+        <div class="text-base text-gray-900">{{ arrivalTime }} 도착 예정</div>
       </div>
     </div>
 
@@ -73,7 +73,7 @@
           <!-- 장소 보기 버튼 -->
           <button
             @click="showParkingModal = true"
-            class="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition-colors z-10 text-sm font-bold"
+            class="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition-colors z-10 text-sm"
           >
             장소 보기
           </button>
@@ -105,7 +105,7 @@
       <!-- 바코드찍기 버튼 -->
       <button
         @click="showBarcodeModal = true"
-        class="flex-1 bg-blue-600 text-white rounded-2xl shadow-sm p-5 font-bold text-base hover:bg-blue-700 transition-colors"
+        class="flex-1 bg-blue-600 text-white rounded-2xl shadow-sm p-5 text-base hover:bg-blue-700 transition-colors"
       >
         바코드찍기
       </button>
@@ -117,37 +117,37 @@
     >
       <div class="flex justify-between items-center mb-4">
         <div class="text-lg font-bold text-gray-900">오늘 일정</div>
-        <div class="text-base font-bold text-gray-900">
+        <div class="text-base text-gray-900">
           {{ todaySchedule.title }}
         </div>
       </div>
 
       <div class="border-t border-dashed border-gray-300 pt-4">
 
-        <div class="space-y-2 text-sm text-gray-600">
+        <div class="space-y-2">
           <div class="flex justify-between">
-            <span>장소</span>
-            <span class="text-gray-900">{{ todaySchedule.location }}</span>
+            <span class="text-sm text-gray-600">장소</span>
+            <span class="text-base text-gray-900">{{ todaySchedule.location }}</span>
           </div>
           <div class="flex justify-between">
-            <span>운영 시간</span>
-            <span class="text-gray-900"
+            <span class="text-sm text-gray-600">운영 시간</span>
+            <span class="text-base text-gray-900"
               >{{ todaySchedule.operatingHours }} ({{
                 todaySchedule.duration
               }})</span
             >
           </div>
           <div class="flex justify-between">
-            <span>예약 인원</span>
-            <span class="text-gray-900"
+            <span class="text-sm text-gray-600">예약 인원</span>
+            <span class="text-base text-gray-900"
               >{{ todaySchedule.bookedCapacity }}/{{
                 todaySchedule.totalCapacity
               }}</span
             >
           </div>
           <div class="flex justify-between">
-            <span>상태</span>
-            <span class="text-gray-900">{{ todaySchedule.status }}</span>
+            <span class="text-sm text-gray-600">상태</span>
+            <span class="text-base text-gray-900">{{ todaySchedule.status }}</span>
           </div>
         </div>
       </div>
@@ -185,7 +185,7 @@
           <div class="flex-1 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
             <div class="p-4 bg-blue-50 dark:bg-blue-900/20">
               <h3
-                class="text-sm font-bold text-blue-700 dark:text-blue-300 mb-1"
+                class="text-sm text-blue-700 dark:text-blue-300 mb-1"
               >
                 예약번호
               </h3>
@@ -202,7 +202,7 @@
             >
               <div class="mb-2">
                 <span
-                  class="text-sm font-bold text-gray-900 dark:text-white"
+                  class="text-base text-gray-900 dark:text-white"
                   >{{ reservation.id }}</span
                 >
               </div>
@@ -213,14 +213,14 @@
                 <button
                   v-if="selectedReservationForComplete?.id !== reservation.id"
                   @click="completeReservationFromList(reservation)"
-                  class="text-sm font-bold bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
+                  class="text-sm bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   완료
                 </button>
                 <button
                   v-else
                   @click="cancelCompleteReservation(reservation)"
-                  class="text-sm font-bold bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition-colors"
+                  class="text-sm bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition-colors"
                 >
                   완료 취소
                 </button>
@@ -239,7 +239,7 @@
           <div class="flex-1 overflow-y-auto">
             <div class="p-4 bg-gray-50 dark:bg-gray-800/50">
               <h3
-                class="text-sm font-bold text-gray-600 dark:text-gray-400 mb-1"
+                class="text-sm text-gray-600 dark:text-gray-400 mb-1"
               >
                 완료 예약
               </h3>
@@ -326,7 +326,7 @@
             </div>
             <button
               @click="startScanning"
-              class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold text-base hover:bg-blue-700 transition-colors"
+              class="bg-blue-600 text-white px-6 py-3 rounded-lg text-base hover:bg-blue-700 transition-colors"
             >
               카메라 시작
             </button>
@@ -350,20 +350,20 @@
           >
             <div class="flex items-center gap-2 mb-2">
               <i class="fi fi-rr-check-circle text-xl"></i>
-              <p class="font-bold text-base">스캔 완료!</p>
+              <p class="text-base">스캔 완료!</p>
             </div>
             <p class="text-sm mb-3 bg-white/20 rounded-lg p-2 font-mono">
               {{ scannedCode }}
             </p>
             <button
               @click="handleScannedCode(scannedCode)"
-              class="w-full bg-white text-green-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-100 transition-colors mb-2"
+              class="w-full bg-white text-green-600 px-4 py-2 rounded-lg text-sm hover:bg-gray-100 transition-colors mb-2"
             >
               조회하기
             </button>
             <button
               @click="resetScan"
-              class="w-full bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-white/30 transition-colors"
+              class="w-full bg-white/20 text-white px-4 py-2 rounded-lg text-sm hover:bg-white/30 transition-colors"
             >
               다시 스캔
             </button>
@@ -412,14 +412,14 @@
           <div class="flex gap-3">
             <button
               @click="handleSearch"
-              class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-bold text-base hover:bg-blue-700 transition-colors"
+              class="flex-1 bg-blue-600 text-white py-3 rounded-lg text-base hover:bg-blue-700 transition-colors"
             >
               조회
             </button>
             <button
               v-if="selectedReservation"
               @click="completeReservation"
-              class="flex-1 bg-green-600 text-white py-3 rounded-lg font-bold text-base hover:bg-green-700 transition-colors"
+              class="flex-1 bg-green-600 text-white py-3 rounded-lg text-base hover:bg-green-700 transition-colors"
             >
               완료
             </button>
@@ -430,32 +430,32 @@
             v-if="selectedReservation"
             class="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-700"
           >
-            <div class="text-white text-sm space-y-2">
+            <div class="text-white space-y-2">
               <div class="flex justify-between">
-                <span class="text-gray-400">예약번호</span>
-                <span class="font-bold">{{ selectedReservation.id }}</span>
+                <span class="text-sm text-gray-400">예약번호</span>
+                <span class="text-base">{{ selectedReservation.id }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-400">고객명</span>
-                <span class="font-bold">{{
+                <span class="text-sm text-gray-400">고객명</span>
+                <span class="text-base">{{
                   selectedReservation.customerName
                 }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-400">전화번호</span>
-                <span class="font-bold">{{
+                <span class="text-sm text-gray-400">전화번호</span>
+                <span class="text-base">{{
                   selectedReservation.phone
                 }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-400">주소</span>
-                <span class="font-bold text-right">{{
+                <span class="text-sm text-gray-400">주소</span>
+                <span class="text-base text-right">{{
                   selectedReservation.address
                 }}</span>
               </div>
               <div class="flex justify-between">
-                <span class="text-gray-400">하차 시간</span>
-                <span class="font-bold">{{
+                <span class="text-sm text-gray-400">하차 시간</span>
+                <span class="text-base">{{
                   selectedReservation.time
                 }}</span>
               </div>
@@ -463,9 +463,9 @@
                 v-if="selectedReservation.original"
                 class="flex justify-between"
               >
-                <span class="text-gray-400">상태</span>
+                <span class="text-sm text-gray-400">상태</span>
                 <span
-                  class="font-bold"
+                  class="text-base"
                   :class="
                     selectedReservation.status === 'done'
                       ? 'text-green-400'
@@ -513,16 +513,16 @@
               <div
                 class="flex justify-between items-center py-3 border-b border-gray-200"
               >
-                <span class="text-gray-600">장소</span>
-                <span class="text-gray-900 font-bold">{{
+                <span class="text-sm text-gray-600">장소</span>
+                <span class="text-base text-gray-900">{{
                   todaySchedule.location
                 }}</span>
               </div>
               <div
                 class="flex justify-between items-center py-3 border-b border-gray-200"
               >
-                <span class="text-gray-600">운영 시간</span>
-                <span class="text-gray-900 font-bold"
+                <span class="text-sm text-gray-600">운영 시간</span>
+                <span class="text-base text-gray-900"
                   >{{ todaySchedule.operatingHours }} ({{
                     todaySchedule.duration
                   }})</span
@@ -531,16 +531,16 @@
               <div
                 class="flex justify-between items-center py-3 border-b border-gray-200"
               >
-                <span class="text-gray-600">예약 인원</span>
-                <span class="text-gray-900 font-bold"
+                <span class="text-sm text-gray-600">예약 인원</span>
+                <span class="text-base text-gray-900"
                   >{{ todaySchedule.bookedCapacity }}/{{
                     todaySchedule.totalCapacity
                   }}</span
                 >
               </div>
               <div class="flex justify-between items-center py-3">
-                <span class="text-gray-600">상태</span>
-                <span class="text-gray-900 font-bold">{{
+                <span class="text-sm text-gray-600">상태</span>
+                <span class="text-base text-gray-900">{{
                   todaySchedule.status
                 }}</span>
               </div>
