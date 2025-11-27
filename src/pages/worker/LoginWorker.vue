@@ -7,12 +7,12 @@
           <span class="text-4xl">🧹</span>
         </div>
         <h1 class="text-2xl font-bold text-gray-900 mb-2">청소 기사 앱</h1>
-        <p class="text-gray-600">안전하고 깔끔한 청소 작업을 시작하세요</p>
+        <p class="text-base text-gray-600">안전하고 깔끔한 청소 작업을 시작하세요</p>
       </div>
       <!-- 로그폼 -->
       <form class="space-y-4" @submit.prevent="login">
         <div>
-          <label for="workerId">기사 ID</label>
+          <label for="workerId" class="text-sm text-gray-600">기사 ID</label>
           <input
             id="workerId"
             v-model="workerId"
@@ -23,7 +23,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2"> 비밀번호 </label>
+          <label class="block text-sm text-gray-600 mb-2"> 비밀번호 </label>
           <input
             v-model="password"
             type="password"
@@ -39,14 +39,14 @@
         <!-- 로그인 버튼 -->
         <button
           type="submit"
-          class="w-full py-4 bg-blue-600 text-white rounded-xl font-semibold text-lg shadow-lg active:scale-[0.98] transition-transform">
+          class="w-full py-4 bg-blue-600 text-white rounded-xl font-bold text-base shadow-lg active:scale-[0.98] transition-transform">
           로그인
         </button>
       </form>
       <!-- 도움말 -->
-      <div class="mt-6 text-center text-sm text-gray-500">
+      <div class="mt-6 text-center text-sm text-gray-600">
         <p>비밀번호를 잊으셨나요?</p>
-        <button class="text-blue-600 font-medium mt-2">비밀번호 찾기</button>
+        <button class="text-blue-600 font-bold mt-2">비밀번호 찾기</button>
       </div>
     </div>
   </div>

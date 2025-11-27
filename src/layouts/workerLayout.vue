@@ -18,7 +18,7 @@
             <div class="w-3 h-3 bg-blue-400 rounded-sm"></div>
             <div class="w-3 h-3 bg-cyan-300 rounded-sm"></div>
           </div>
-          <span class="text-white font-medium"
+          <span class="text-white text-base"
             >{{ authStore.user?.name || "김운전" }}님</span
           >
         </button>

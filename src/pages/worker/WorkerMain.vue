@@ -2,7 +2,7 @@
   <div class="pb-20">
     <!-- 날짜와 날씨 (카드 위) -->
     <div class="mx-4 mt-4 mb-2 flex items-center justify-between">
-      <div class="text-lg font-semibold text-gray-900">
+      <div class="text-lg font-bold text-gray-900">
         {{ formatDate(new Date()) }}
       </div>
       <!-- 날씨 정보 -->
@@ -39,14 +39,14 @@
           >
             <div class="flex items-center gap-2">
               <i class="fi fi-rr-marker text-blue-600"></i>
-              <div class="text-xs text-gray-600">{{ parkingLocationAddress }}</div>
+              <div class="text-sm text-gray-600">{{ parkingLocationAddress }}</div>
             </div>
           </div>
 
           <!-- 장소 보기 버튼 -->
           <button
             @click="showParkingModal = true"
-            class="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition-colors z-10"
+            class="absolute top-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg hover:bg-blue-700 transition-colors z-10 text-sm font-bold"
           >
             장소 보기
           </button>
@@ -78,7 +78,7 @@
       <!-- 바코드찍기 버튼 -->
       <button
         @click="showBarcodeModal = true"
-        class="flex-1 bg-blue-600 text-white rounded-2xl shadow-sm p-5 font-semibold hover:bg-blue-700 transition-colors"
+        class="flex-1 bg-blue-600 text-white rounded-2xl shadow-sm p-5 font-bold text-base hover:bg-blue-700 transition-colors"
       >
         바코드찍기
       </button>
@@ -89,8 +89,8 @@
       class="block w-[calc(100%-2rem)] mx-4 mt-4 bg-white rounded-2xl shadow-sm p-5 text-left"
     >
       <div class="flex justify-between items-center mb-4">
-        <div class="text-lg font-semibold text-gray-900">오늘 일정</div>
-        <div class="text-base font-semibold text-gray-900">
+        <div class="text-lg font-bold text-gray-900">오늘 일정</div>
+        <div class="text-base font-bold text-gray-900">
           {{ todaySchedule.title }}
         </div>
       </div>
@@ -139,7 +139,7 @@
           class="sticky top-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 p-5 flex justify-between items-center rounded-t-2xl z-10"
         >
           <div class="flex items-center gap-2">
-            <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+            <h2 class="text-lg font-bold text-gray-900 dark:text-white">
               남은 예약
             </h2>
             <span class="text-sm text-gray-600 dark:text-gray-400">
@@ -158,11 +158,11 @@
           <div class="flex-1 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
             <div class="p-4 bg-blue-50 dark:bg-blue-900/20">
               <h3
-                class="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1"
+                class="text-sm font-bold text-blue-700 dark:text-blue-300 mb-1"
               >
                 예약번호
               </h3>
-              <div class="text-xs text-blue-600 dark:text-blue-400">
+              <div class="text-sm text-blue-600 dark:text-blue-400">
                 {{ pendingReservations.length }}건
               </div>
             </div>
@@ -175,25 +175,25 @@
             >
               <div class="mb-2">
                 <span
-                  class="text-sm font-semibold text-gray-900 dark:text-white"
+                  class="text-sm font-bold text-gray-900 dark:text-white"
                   >{{ reservation.id }}</span
                 >
               </div>
-              <div class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+              <div class="text-sm text-gray-600 dark:text-gray-400 mb-3">
                 {{ reservation.customerName }}
               </div>
               <div class="flex justify-center">
                 <button
                   v-if="selectedReservationForComplete?.id !== reservation.id"
                   @click="completeReservationFromList(reservation)"
-                  class="text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
+                  class="text-sm font-bold bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   완료
                 </button>
                 <button
                   v-else
                   @click="cancelCompleteReservation(reservation)"
-                  class="text-xs bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition-colors"
+                  class="text-sm font-bold bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition-colors"
                 >
                   완료 취소
                 </button>
@@ -212,11 +212,11 @@
           <div class="flex-1 overflow-y-auto">
             <div class="p-4 bg-gray-50 dark:bg-gray-800/50">
               <h3
-                class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1"
+                class="text-sm font-bold text-gray-600 dark:text-gray-400 mb-1"
               >
                 완료 예약
               </h3>
-              <div class="text-xs text-gray-500 dark:text-gray-500">
+              <div class="text-sm text-gray-500 dark:text-gray-500">
                 {{ completedReservations.length }}건
               </div>
             </div>
@@ -229,17 +229,17 @@
               >
                 <div class="mb-2">
                   <span
-                    class="text-sm font-semibold text-gray-500 dark:text-gray-400"
+                    class="text-sm font-bold text-gray-500 dark:text-gray-400"
                     >{{ reservation.id }}</span
                   >
                 </div>
-                <div class="text-xs text-gray-400 dark:text-gray-500 mb-3">
+                <div class="text-sm text-gray-400 dark:text-gray-500 mb-3">
                   {{ reservation.customerName }}
                 </div>
                 <div class="flex justify-center">
                   <button
                     @click="cancelCompleteReservation(reservation)"
-                    class="text-xs bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
+                    class="text-sm font-bold bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
                   >
                     취소
                   </button>
@@ -267,7 +267,7 @@
         <div
           class="sticky top-0 bg-gray-900 border-b border-gray-700 p-5 flex justify-between items-center z-10"
         >
-          <h2 class="text-xl font-bold text-white">바코드 스캔</h2>
+          <h2 class="text-lg font-bold text-white">바코드 스캔</h2>
           <button
             @click="closeBarcodeModal"
             class="text-white hover:text-gray-300 text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
@@ -294,12 +294,12 @@
               >
                 <i class="fi fi-rr-camera text-4xl text-blue-400"></i>
               </div>
-              <p class="text-lg font-semibold mb-2">카메라 권한이 필요합니다</p>
+              <p class="text-lg font-bold mb-2">카메라 권한이 필요합니다</p>
               <p class="text-sm text-gray-300">바코드를 카메라에 맞춰주세요</p>
             </div>
             <button
               @click="startScanning"
-              class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              class="bg-blue-600 text-white px-6 py-3 rounded-lg font-bold text-base hover:bg-blue-700 transition-colors"
             >
               카메라 시작
             </button>
@@ -323,20 +323,20 @@
           >
             <div class="flex items-center gap-2 mb-2">
               <i class="fi fi-rr-check-circle text-xl"></i>
-              <p class="font-semibold">스캔 완료!</p>
+              <p class="font-bold text-base">스캔 완료!</p>
             </div>
             <p class="text-sm mb-3 bg-white/20 rounded-lg p-2 font-mono">
               {{ scannedCode }}
             </p>
             <button
               @click="handleScannedCode(scannedCode)"
-              class="w-full bg-white text-green-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition-colors mb-2"
+              class="w-full bg-white text-green-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-100 transition-colors mb-2"
             >
               조회하기
             </button>
             <button
               @click="resetScan"
-              class="w-full bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-white/30 transition-colors"
+              class="w-full bg-white/20 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-white/30 transition-colors"
             >
               다시 스캔
             </button>
@@ -350,7 +350,7 @@
               <button
                 @click="searchType = 'reservation'"
                 :class="[
-                  'flex-1 py-2.5 rounded-lg font-medium transition-colors',
+                  'flex-1 py-2.5 rounded-lg font-bold text-sm transition-colors',
                   searchType === 'reservation'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700',
@@ -361,7 +361,7 @@
               <button
                 @click="searchType = 'phone'"
                 :class="[
-                  'flex-1 py-2.5 rounded-lg font-medium transition-colors',
+                  'flex-1 py-2.5 rounded-lg font-bold text-sm transition-colors',
                   searchType === 'phone'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700',
@@ -385,14 +385,14 @@
           <div class="flex gap-3">
             <button
               @click="handleSearch"
-              class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              class="flex-1 bg-blue-600 text-white py-3 rounded-lg font-bold text-base hover:bg-blue-700 transition-colors"
             >
               조회
             </button>
             <button
               v-if="selectedReservation"
               @click="completeReservation"
-              class="flex-1 bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+              class="flex-1 bg-green-600 text-white py-3 rounded-lg font-bold text-base hover:bg-green-700 transition-colors"
             >
               완료
             </button>
@@ -406,29 +406,29 @@
             <div class="text-white text-sm space-y-2">
               <div class="flex justify-between">
                 <span class="text-gray-400">예약번호</span>
-                <span class="font-semibold">{{ selectedReservation.id }}</span>
+                <span class="font-bold">{{ selectedReservation.id }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-400">고객명</span>
-                <span class="font-semibold">{{
+                <span class="font-bold">{{
                   selectedReservation.customerName
                 }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-400">전화번호</span>
-                <span class="font-semibold">{{
+                <span class="font-bold">{{
                   selectedReservation.phone
                 }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-400">주소</span>
-                <span class="font-semibold text-right">{{
+                <span class="font-bold text-right">{{
                   selectedReservation.address
                 }}</span>
               </div>
               <div class="flex justify-between">
                 <span class="text-gray-400">하차 시간</span>
-                <span class="font-semibold">{{
+                <span class="font-bold">{{
                   selectedReservation.time
                 }}</span>
               </div>
@@ -438,7 +438,7 @@
               >
                 <span class="text-gray-400">상태</span>
                 <span
-                  class="font-semibold"
+                  class="font-bold"
                   :class="
                     selectedReservation.status === 'done'
                       ? 'text-green-400'
@@ -468,7 +468,7 @@
         <div
           class="sticky top-0 bg-white border-b border-gray-200 p-5 flex justify-between items-center rounded-t-3xl"
         >
-          <h2 class="text-xl font-bold text-gray-900">오늘 일정</h2>
+          <h2 class="text-lg font-bold text-gray-900">오늘 일정</h2>
           <button
             @click="showScheduleModal = false"
             class="text-gray-500 hover:text-gray-700 text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition-colors"
@@ -486,16 +486,16 @@
               <div
                 class="flex justify-between items-center py-3 border-b border-gray-200"
               >
-                <span class="text-gray-600 font-medium">장소</span>
-                <span class="text-gray-900 font-semibold">{{
+                <span class="text-gray-600">장소</span>
+                <span class="text-gray-900 font-bold">{{
                   todaySchedule.location
                 }}</span>
               </div>
               <div
                 class="flex justify-between items-center py-3 border-b border-gray-200"
               >
-                <span class="text-gray-600 font-medium">운영 시간</span>
-                <span class="text-gray-900 font-semibold"
+                <span class="text-gray-600">운영 시간</span>
+                <span class="text-gray-900 font-bold"
                   >{{ todaySchedule.operatingHours }} ({{
                     todaySchedule.duration
                   }})</span
@@ -504,16 +504,16 @@
               <div
                 class="flex justify-between items-center py-3 border-b border-gray-200"
               >
-                <span class="text-gray-600 font-medium">예약 인원</span>
-                <span class="text-gray-900 font-semibold"
+                <span class="text-gray-600">예약 인원</span>
+                <span class="text-gray-900 font-bold"
                   >{{ todaySchedule.bookedCapacity }}/{{
                     todaySchedule.totalCapacity
                   }}</span
                 >
               </div>
               <div class="flex justify-between items-center py-3">
-                <span class="text-gray-600 font-medium">상태</span>
-                <span class="text-gray-900 font-semibold">{{
+                <span class="text-gray-600">상태</span>
+                <span class="text-gray-900 font-bold">{{
                   todaySchedule.status
                 }}</span>
               </div>
@@ -534,7 +534,7 @@
         <div
           class="sticky top-0 bg-gray-900 border-b border-gray-700 p-5 flex justify-between items-center z-10"
         >
-          <h2 class="text-xl font-bold text-white">주차장 위치</h2>
+          <h2 class="text-lg font-bold text-white">주차장 위치</h2>
           <button
             @click="showParkingModal = false"
             class="text-white hover:text-gray-300 text-2xl w-10 h-10 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
