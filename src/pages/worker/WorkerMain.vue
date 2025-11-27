@@ -702,9 +702,9 @@ const prevImage = () => {
 onMounted(() => {
   // 카카오 맵 스크립트 로드
   if (!window.kakao || !window.kakao.maps) {
-    const kakaoApiKey = import.meta.env.VITE_KAKAO_MAP_API_KEY;
+    const kakaoApiKey = import.meta.env.VITE_KAKAO_MAP_APP_KEY;
     if (!kakaoApiKey) {
-      console.error("카카오맵 API 키가 설정되지 않았습니다. VITE_KAKAO_MAP_API_KEY 환경 변수를 설정해주세요.");
+      console.error("카카오맵 API 키가 설정되지 않았습니다. VITE_KAKAO_MAP_APP_KEY 환경 변수를 설정해주세요.");
       return;
     }
     const script = document.createElement("script");
