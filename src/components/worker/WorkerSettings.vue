@@ -20,7 +20,7 @@
 
           <!-- 프로필 정보 -->
           <div class="flex-1">
-            <div class="text-lg font-semibold text-gray-900 mb-1">
+            <div class="text-lg font-bold text-gray-900 mb-1">
               {{ userInfo.displayName }}
             </div>
             <div class="text-sm text-gray-600 mb-1">{{ userInfo.phone }}</div>
@@ -32,7 +32,7 @@
         <div class="mt-4 text-right">
           <button
             @click="goToEditProfile"
-            class="text-blue-600 text-sm font-medium"
+            class="text-blue-600 text-sm font-bold"
           >
             내정보 수정 >
           </button>
@@ -41,33 +41,33 @@
 
       <!-- 일정 정보 카드 -->
       <div class="bg-white rounded-2xl shadow-sm mt-4 p-5">
-        <div class="text-lg font-semibold text-gray-900 mb-3">
+        <div class="text-lg font-bold text-gray-900 mb-3">
           전체 운영 일정
         </div>
 
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">오늘 행사</span>
-            <span class="text-base font-semibold text-gray-900"
+            <span class="text-base font-bold text-gray-900"
               >{{ todayScheduleCount }}건</span
             >
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 주 행사</span>
-            <span class="text-base font-semibold text-gray-900"
+            <span class="text-base font-bold text-gray-900"
               >{{ weekScheduleCount }}건</span
             >
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 달 행사</span>
-            <span class="text-base font-semibold text-gray-900"
+            <span class="text-base font-bold text-gray-900"
               >{{ monthScheduleCount }}건</span
             >
           </div>
           <div class="flex justify-end mt-2">
             <button
               @click="goToCalendar"
-              class="text-blue-600 text-sm font-medium"
+              class="text-blue-600 text-sm font-bold"
             >
               자세히 보기 >
             </button>
@@ -77,33 +77,33 @@
 
       <!-- 기사 급여 카드 -->
       <div class="bg-white rounded-2xl shadow-sm mt-4 p-5">
-        <div class="text-lg font-semibold text-gray-900 mb-3">
+        <div class="text-lg font-bold text-gray-900 mb-3">
           내 급여 현황
         </div>
 
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">오늘</span>
-            <span class="text-base font-semibold text-gray-900"
+            <span class="text-base font-bold text-gray-900"
               >-원</span
             >
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 주</span>
-            <span class="text-base font-semibold text-gray-900"
+            <span class="text-base font-bold text-gray-900"
               >-원</span
             >
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 달</span>
-            <span class="text-base font-semibold text-gray-900"
+            <span class="text-base font-bold text-gray-900"
               >-원</span
             >
           </div>
           <div class="flex justify-end mt-2">
             <button
               @click="goToSalaryDetail"
-              class="text-blue-600 text-sm font-medium"
+              class="text-blue-600 text-sm font-bold"
             >
               자세히 보기 >
             </button>
@@ -115,7 +115,7 @@
       <div class="mt-4 mb-4 flex justify-end">
         <button
           @click="handleLogout"
-          class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-2 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all flex items-center gap-2 border border-gray-200 dark:border-gray-700"
+          class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-2 rounded-lg text-sm font-bold shadow-sm hover:shadow-md transition-all flex items-center gap-2 border border-gray-200 dark:border-gray-700"
         >
           <i class="fi fi-rr-sign-out-alt"></i>
           <span>로그아웃</span>
