@@ -1,22 +1,5 @@
 <template>
   <div class="pb-20">
-    <!-- 헤더 -->
-    <div class="bg-white sticky top-0 z-10 border-b border-gray-200">
-      <div class="flex items-center justify-between p-4">
-        <div class="flex items-center gap-2">
-          <button @click="goBack" class="text-gray-600">
-            <i class="fi fi-rr-arrow-left text-xl"></i>
-          </button>
-          <h1 class="text-lg font-semibold text-gray-900">내정보 수정</h1>
-        </div>
-        <button 
-          @click="saveProfile"
-          class="text-blue-600 text-sm font-medium"
-        >
-          저장
-        </button>
-      </div>
-    </div>
 
     <!-- 프로필 이미지 섹션 -->
     <div class="bg-white rounded-2xl shadow-sm mx-4 mt-4 p-5">
@@ -195,6 +178,18 @@
           />
         </div>
       </div>
+    </div>
+
+    <!-- 저장 버튼 -->
+    <div class="mx-4 mt-4 mb-4 flex justify-end">
+      <button
+        @click="saveProfile"
+        class="bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 px-4 py-3 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all flex items-center gap-2 border border-gray-200 dark:border-gray-700 justify-center"
+        style="width: 100px;"
+      >
+        <i class="fi fi-rr-disk"></i>
+        <span>저장</span>
+      </button>
     </div>
   </div>
 </template>

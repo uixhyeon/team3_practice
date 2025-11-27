@@ -95,6 +95,12 @@ const router = createRouter({
           meta: { title: "내정보 수정", role: "worker" },
         },
         {
+          path: "salary-detail",
+          name: "WorkerSalaryDetail",
+          component: () => import("../pages/worker/SalaryDetail.vue"),
+          meta: { title: "급여 상세", role: "worker" },
+        },
+        {
           path: "settings",
           name: "WorkerSettings",
           component: () => import("../components/worker/WorkerSettings.vue"),

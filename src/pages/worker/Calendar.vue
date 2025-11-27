@@ -53,20 +53,10 @@
 
     <!-- 선택 날짜 일정 리스트 -->
     <div class="mt-4 mx-4">
-      <div class="flex items-center justify-between mb-2">
+      <div class="mb-2">
         <p class="text-sm text-gray-600 dark:text-gray-400">
           {{ selectedDateLabel }}일정
         </p>
-        <select
-          v-model="statusFilter"
-          class="text-sm border border-gray-300 dark:border-gray-600 rounded-lg px-2 py-1 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
-        >
-          <option value="all">전체</option>
-          <option value="scheduled">예약</option>
-          <option value="onroute">이동중</option>
-          <option value="working">작업중</option>
-          <option value="done">완료</option>
-        </select>
       </div>
     </div>
 

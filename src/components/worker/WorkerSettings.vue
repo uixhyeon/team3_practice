@@ -47,19 +47,19 @@
 
         <div class="space-y-3">
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">오늘 일정</span>
+            <span class="text-sm text-gray-600">오늘 행사</span>
             <span class="text-base font-semibold text-gray-900"
               >{{ todayScheduleCount }}건</span
             >
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">이번 주 일정</span>
+            <span class="text-sm text-gray-600">이번 주 행사</span>
             <span class="text-base font-semibold text-gray-900"
               >{{ weekScheduleCount }}건</span
             >
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-sm text-gray-600">이번 달 일정</span>
+            <span class="text-sm text-gray-600">이번 달 행사</span>
             <span class="text-base font-semibold text-gray-900"
               >{{ monthScheduleCount }}건</span
             >
@@ -102,6 +102,7 @@
           </div>
           <div class="flex justify-end mt-2">
             <button
+              @click="goToSalaryDetail"
               class="text-blue-600 text-sm font-medium"
             >
               자세히 보기 >
@@ -143,6 +144,10 @@ const goToCalendar = () => {
 
 const goToEditProfile = () => {
   router.push({ name: "WorkerEditProfile" });
+};
+
+const goToSalaryDetail = () => {
+  router.push({ name: "WorkerSalaryDetail" });
 };
 
 const handleLogout = () => {

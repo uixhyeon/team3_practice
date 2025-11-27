@@ -85,9 +85,8 @@
     </div>
 
     <!-- 오늘 일정 카드 -->
-    <button
-      @click="showScheduleModal = true"
-      class="block w-[calc(100%-2rem)] mx-4 mt-4 bg-white rounded-2xl shadow-sm p-5 text-left transition-shadow"
+    <div
+      class="block w-[calc(100%-2rem)] mx-4 mt-4 bg-white rounded-2xl shadow-sm p-5 text-left"
     >
       <div class="flex justify-between items-center mb-4">
         <div class="text-lg font-semibold text-gray-900">오늘 일정</div>
@@ -125,23 +124,28 @@
           </div>
         </div>
       </div>
-    </button>
+    </div>
 
     <!-- 진행 인원 모달 -->
     <div
       v-if="showParticipantsModal"
-      class="fixed inset-0 z-50 bg-black/50 flex items-end justify-center px-4 pb-4"
+      class="fixed inset-0 z-50 bg-black/50 flex items-center justify-center px-4"
       @click.self="showParticipantsModal = false"
     >
       <div
-        class="w-full max-w-[480px] bg-white dark:bg-slate-800 rounded-t-3xl max-h-[85vh] overflow-hidden shadow-2xl flex flex-col"
+        class="w-full max-w-[480px] bg-white dark:bg-slate-800 rounded-2xl h-[70vh] overflow-hidden shadow-2xl flex flex-col"
       >
         <div
-          class="sticky top-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 p-5 flex justify-between items-center rounded-t-3xl z-10"
+          class="sticky top-0 bg-white dark:bg-slate-800 border-b border-gray-200 dark:border-gray-700 p-5 flex justify-between items-center rounded-t-2xl z-10"
         >
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-            진행 인원
-          </h2>
+          <div class="flex items-center gap-2">
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+              남은 예약
+            </h2>
+            <span class="text-sm text-gray-600 dark:text-gray-400">
+              {{ pendingReservations.length }}/{{ reservations.length }}
+            </span>
+          </div>
           <button
             @click="showParticipantsModal = false"
             class="text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 text-2xl w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -149,11 +153,9 @@
             ×
           </button>
         </div>
-        <div class="flex-1 overflow-hidden flex">
+        <div class="flex-1 overflow-y-auto flex">
           <!-- 왼쪽: 예약번호 (진행중) -->
-          <div
-            class="flex-1 border-r border-gray-200 dark:border-gray-700 overflow-y-auto"
-          >
+          <div class="flex-1 border-r border-gray-200 dark:border-gray-700 overflow-y-auto">
             <div class="p-4 bg-blue-50 dark:bg-blue-900/20">
               <h3
                 class="text-sm font-semibold text-blue-700 dark:text-blue-300 mb-1"
@@ -165,78 +167,82 @@
               </div>
             </div>
             <div class="p-4 space-y-2">
-              <div
-                v-for="reservation in pendingReservations"
-                :key="reservation.id"
-                class="p-3 bg-white dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors cursor-pointer"
-                @click="selectedReservationForComplete = reservation"
-              >
-                <div class="flex items-center justify-between mb-2">
-                  <span
-                    class="text-sm font-semibold text-gray-900 dark:text-white"
-                    >{{ reservation.id }}</span
-                  >
-                  <button
-                    @click.stop="completeReservationFromList(reservation)"
-                    class="text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
-                  >
-                    완료
-                  </button>
-                </div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">
-                  {{ reservation.customerName }} · {{ reservation.time }}
-                </div>
-                <div
-                  class="text-xs text-gray-500 dark:text-gray-500 mt-1 truncate"
+            <!-- 진행중 예약 -->
+            <div
+              v-for="reservation in pendingReservations"
+              :key="reservation.id"
+              class="p-3 bg-white dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-400 transition-colors"
+            >
+              <div class="mb-2">
+                <span
+                  class="text-sm font-semibold text-gray-900 dark:text-white"
+                  >{{ reservation.id }}</span
                 >
-                  {{ reservation.address }}
-                </div>
               </div>
-              <div
-                v-if="pendingReservations.length === 0"
-                class="text-center text-gray-400 dark:text-gray-500 text-sm py-8"
-              >
-                예약이 없습니다
+              <div class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+                {{ reservation.customerName }}
               </div>
+              <div class="flex justify-center">
+                <button
+                  v-if="selectedReservationForComplete?.id !== reservation.id"
+                  @click="completeReservationFromList(reservation)"
+                  class="text-xs bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  완료
+                </button>
+                <button
+                  v-else
+                  @click="cancelCompleteReservation(reservation)"
+                  class="text-xs bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 transition-colors"
+                >
+                  완료 취소
+                </button>
+              </div>
+            </div>
+            <div
+              v-if="pendingReservations.length === 0"
+              class="text-center text-gray-400 dark:text-gray-500 text-sm py-8"
+            >
+              예약이 없습니다
+            </div>
             </div>
           </div>
 
-          <!-- 오른쪽: 완료예약번호 -->
+          <!-- 오른쪽: 완료 예약 -->
           <div class="flex-1 overflow-y-auto">
-            <div class="p-4 bg-green-50 dark:bg-green-900/20">
+            <div class="p-4 bg-gray-50 dark:bg-gray-800/50">
               <h3
-                class="text-sm font-semibold text-green-700 dark:text-green-300 mb-1"
+                class="text-sm font-semibold text-gray-600 dark:text-gray-400 mb-1"
               >
-                완료예약번호
+                완료 예약
               </h3>
-              <div class="text-xs text-green-600 dark:text-green-400">
+              <div class="text-xs text-gray-500 dark:text-gray-500">
                 {{ completedReservations.length }}건
               </div>
             </div>
             <div class="p-4 space-y-2">
+              <!-- 완료된 예약 (회색으로 표시) -->
               <div
                 v-for="reservation in completedReservations"
                 :key="reservation.id"
-                class="p-3 bg-white dark:bg-slate-700 rounded-lg border border-gray-200 dark:border-gray-600"
+                class="p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600 opacity-60"
               >
-                <div class="flex items-center justify-between mb-2">
+                <div class="mb-2">
                   <span
-                    class="text-sm font-semibold text-gray-900 dark:text-white"
+                    class="text-sm font-semibold text-gray-500 dark:text-gray-400"
                     >{{ reservation.id }}</span
                   >
-                  <span
-                    class="text-xs bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 px-2 py-1 rounded"
+                </div>
+                <div class="text-xs text-gray-400 dark:text-gray-500 mb-3">
+                  {{ reservation.customerName }}
+                </div>
+                <div class="flex justify-center">
+                  <button
+                    @click="cancelCompleteReservation(reservation)"
+                    class="text-xs bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-3 py-1 rounded-lg hover:bg-gray-400 dark:hover:bg-gray-600 transition-colors"
                   >
-                    완료
-                  </span>
-                </div>
-                <div class="text-xs text-gray-600 dark:text-gray-400">
-                  {{ reservation.customerName }} · {{ reservation.time }}
-                </div>
-                <div
-                  class="text-xs text-gray-500 dark:text-gray-500 mt-1 truncate"
-                >
-                  {{ reservation.address }}
+                    취소
+                  </button>
                 </div>
               </div>
               <div
@@ -905,11 +911,29 @@ const completeReservation = () => {
   }
 };
 
+// 완료 취소 처리
+const cancelCompleteReservation = (reservation) => {
+  const resIndex = reservations.value.findIndex((r) => r.id === reservation.id);
+  if (resIndex !== -1) {
+    reservations.value[resIndex].status = "scheduled";
+    if (reservations.value[resIndex].original) {
+      reservations.value[resIndex].original.status = "예약중";
+      reservations.value[resIndex].original.deliveryStatus = null;
+    }
+  }
+  selectedReservationForComplete.value = null;
+};
+
 // 진행인원 모달에서 완료 처리
 const completeReservationFromList = (reservation) => {
-  const index = reservations.value.findIndex((r) => r.id === reservation.id);
-  if (index !== -1) {
-    reservations.value[index].status = "done";
+  selectedReservationForComplete.value = reservation;
+  const resIndex = reservations.value.findIndex((r) => r.id === reservation.id);
+  if (resIndex !== -1) {
+    reservations.value[resIndex].status = "done";
+    if (reservations.value[resIndex].original) {
+      reservations.value[resIndex].original.status = "완료";
+      reservations.value[resIndex].original.deliveryStatus = "완료";
+    }
   }
 };
 
