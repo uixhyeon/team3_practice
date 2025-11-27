@@ -1,112 +1,85 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║ 페이지: WorkerSettings.vue                                           ║
+  ╠══════════════════════════════════════════════════════════════════════╣
+  ║ 타입: 페이지 (Page - components 폴더에 있지만 페이지로 사용됨)       ║
+  ║                                                                      ║
+  ║ 주요 기능:                                                           ║
+  ║ - 워커(기사) 설정 및 정보 페이지                                     ║
+  ║ - 프로필 정보 표시 (이름, 연락처, 이메일)                            ║
+  ║ - 일정 정보 요약 (오늘, 이번 주, 이번 달 행사 건수)                  ║
+  ║ - 급여 현황 요약                                                     ║
+  ║ - 로그아웃 기능                                                      ║
+  ║                                                                      ║
+  ║ 특징:                                                                ║
+  ║ - 프로필 수정 페이지로 이동                                          ║
+  ║ - 급여 상세 페이지로 이동                                            ║
+  ║ - 캘린더 페이지로 이동                                               ║
+  ║ - JSON 데이터 기반 일정 통계 계산                                    ║
+  ╚══════════════════════════════════════════════════════════════════════╝
+-->
+
 <template>
   <div class="pb-20">
-    <!-- 컨텐츠 영역 -->
     <div class="px-4 py-4">
       <!-- 프로필 정보 카드 -->
       <div class="bg-white rounded-2xl shadow-sm p-5">
         <div class="flex items-center gap-4">
-          <!-- 프로필 이미지 -->
-          <div
-            class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0"
-          >
-            <img
-              v-if="userInfo.profileImage"
-              :src="userInfo.profileImage"
-              alt="프로필"
-              class="w-full h-full object-cover"
-            />
+          <div class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+            <img v-if="userInfo.profileImage" :src="userInfo.profileImage" alt="프로필" class="w-full h-full object-cover" />
             <span v-else class="text-3xl text-gray-400">👤</span>
           </div>
-
-          <!-- 프로필 정보 -->
           <div class="flex-1">
-            <div class="text-lg font-bold text-gray-900 mb-1">
-              {{ userInfo.displayName }}
-            </div>
+            <div class="text-lg font-bold text-gray-900 mb-1">{{ userInfo.displayName }}</div>
             <div class="text-sm text-gray-600 mb-1">{{ userInfo.phone }}</div>
             <div class="text-sm text-gray-600">{{ userInfo.email }}</div>
           </div>
         </div>
-
-        <!-- 내정보 수정 링크 -->
         <div class="mt-4 text-right">
-          <button
-            @click="goToEditProfile"
-            class="text-blue-600 text-sm font-bold"
-          >
-            내정보 수정 >
-          </button>
+          <button @click="goToEditProfile" class="text-blue-600 text-sm font-bold">내정보 수정 ></button>
         </div>
       </div>
 
       <!-- 일정 정보 카드 -->
       <div class="bg-white rounded-2xl shadow-sm mt-4 p-5">
-        <div class="text-lg font-bold text-gray-900 mb-3">
-          전체 운영 일정
-        </div>
-
+        <div class="text-lg font-bold text-gray-900 mb-3">전체 운영 일정</div>
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">오늘 행사</span>
-            <span class="text-base font-bold text-gray-900"
-              >{{ todayScheduleCount }}건</span
-            >
+            <span class="text-base font-bold text-gray-900">{{ todayScheduleCount }}건</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 주 행사</span>
-            <span class="text-base font-bold text-gray-900"
-              >{{ weekScheduleCount }}건</span
-            >
+            <span class="text-base font-bold text-gray-900">{{ weekScheduleCount }}건</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 달 행사</span>
-            <span class="text-base font-bold text-gray-900"
-              >{{ monthScheduleCount }}건</span
-            >
+            <span class="text-base font-bold text-gray-900">{{ monthScheduleCount }}건</span>
           </div>
           <div class="flex justify-end mt-2">
-            <button
-              @click="goToCalendar"
-              class="text-blue-600 text-sm font-bold"
-            >
-              자세히 보기 >
-            </button>
+            <button @click="goToCalendar" class="text-blue-600 text-sm font-bold">자세히 보기 ></button>
           </div>
         </div>
       </div>
 
-      <!-- 기사 급여 카드 -->
+      <!-- 급여 카드 -->
       <div class="bg-white rounded-2xl shadow-sm mt-4 p-5">
-        <div class="text-lg font-bold text-gray-900 mb-3">
-          내 급여 현황
-        </div>
-
+        <div class="text-lg font-bold text-gray-900 mb-3">내 급여 현황</div>
         <div class="space-y-3">
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">오늘</span>
-            <span class="text-base font-bold text-gray-900"
-              >-원</span
-            >
+            <span class="text-base font-bold text-gray-900">-원</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 주</span>
-            <span class="text-base font-bold text-gray-900"
-              >-원</span
-            >
+            <span class="text-base font-bold text-gray-900">-원</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-sm text-gray-600">이번 달</span>
-            <span class="text-base font-bold text-gray-900"
-              >-원</span
-            >
+            <span class="text-base font-bold text-gray-900">-원</span>
           </div>
           <div class="flex justify-end mt-2">
-            <button
-              @click="goToSalaryDetail"
-              class="text-blue-600 text-sm font-bold"
-            >
-              자세히 보기 >
-            </button>
+            <button @click="goToSalaryDetail" class="text-blue-600 text-sm font-bold">자세히 보기 ></button>
           </div>
         </div>
       </div>
@@ -134,9 +107,13 @@ import reservationsData from "@/data/reservations_2025_12.json";
 const authStore = useAuthStore();
 const router = useRouter();
 
-const goToHome = () => {
-  router.push({ name: "WorkerWork" });
-};
+const userInfo = ref({
+  name: authStore.user?.name || "김운전",
+  displayName: "김기사",
+  phone: "010-1234-5678",
+  email: "driver@example.com",
+  profileImage: null,
+});
 
 const goToCalendar = () => {
   router.push({ name: "WorkerCalendar" });
@@ -158,125 +135,54 @@ const handleLogout = () => {
   }
 };
 
-const userInfo = ref({
-  name: authStore.user?.name || "김운전",
-  displayName: "김기사",
-  phone: "010-1234-5678",
-  email: "driver@example.com",
-  profileImage: null,
-});
-
-// 일정 통계 계산 (Calendar.vue와 동일한 방식)
+// 일정 통계 계산
 const today = new Date();
 today.setHours(0, 0, 0, 0);
 
-// 날짜 key 포맷 함수 (Calendar.vue와 동일)
-function fmtKey(d) {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
-}
-
-// 예약 데이터를 jobs 형식으로 변환 (Calendar.vue와 동일)
-const jobs = computed(() => {
-  return reservationsData.reservations.map((r) => {
-    // dropoffTime에서 시간 추출
-    const dropoffDate = r.dropoffTime ? new Date(r.dropoffTime) : null;
-    const timeStr = dropoffDate
-      ? `${String(dropoffDate.getHours()).padStart(2, "0")}:${String(dropoffDate.getMinutes()).padStart(2, "0")}`
-      : "";
-
-    return {
-      id: r.id,
-      date: r.eventDate || (r.dropoffTime ? r.dropoffTime.split("T")[0] : ""),
-      type: r.itemType === "식품(상온)" ? "ice" : "luggage",
-      customerName: r.customerName,
-      time: timeStr,
-      address: r.deliveryAddress || r.eventVenue || "",
-      phone: r.customerPhone,
-      status: r.status === "완료" || r.deliveryStatus === "완료" ? "done" : r.deliveryStatus === "배송중" ? "onroute" : "scheduled",
-      memo: r.specialRequest || "",
-      original: r,
-    };
-  });
-});
-
-// 날짜별 행사 정보 계산 (Calendar.vue와 동일한 방식)
+// 날짜별 행사 그룹화
 const eventsByDate = computed(() => {
   const eventsMap = {};
-  
-  // 예약 데이터를 날짜별로 그룹화하고 행사별로 집계
-  jobs.value.forEach((job) => {
-    if (!job.date) return;
-    
-    const eventName = job.original?.eventName || "행사";
-    const eventVenue = job.original?.eventVenue || "-";
-    const key = `${job.date}|${eventName}|${eventVenue}`;
-    
+
+  reservationsData.reservations.forEach((r) => {
+    const eventDate = r.eventDate || (r.dropoffTime ? r.dropoffTime.split("T")[0] : null);
+    if (!eventDate) return;
+
+    const key = `${eventDate}|${r.eventName || "행사"}|${r.eventVenue || "-"}`;
     if (!eventsMap[key]) {
-      eventsMap[key] = {
-        date: job.date,
-        eventName,
-        eventVenue,
-        key,
-      };
+      eventsMap[key] = { date: eventDate };
     }
   });
-  
-  return eventsMap;
+
+  return Object.values(eventsMap);
 });
 
-// 오늘 일정 수 (행사 건수)
+// 오늘 일정 수
 const todayScheduleCount = computed(() => {
-  const todayKey = fmtKey(today);
-  let count = 0;
-  for (const key in eventsByDate.value) {
-    if (eventsByDate.value[key].date === todayKey) {
-      count++;
-    }
-  }
-  return count;
+  const todayStr = today.toISOString().split("T")[0];
+  return eventsByDate.value.filter((e) => e.date === todayStr).length;
 });
 
-// 이번 주 일정 수 (행사 건수)
+// 이번 주 일정 수
 const weekScheduleCount = computed(() => {
   const weekStart = new Date(today);
-  weekStart.setDate(today.getDate() - today.getDay()); // 이번 주 일요일
+  weekStart.setDate(today.getDate() - today.getDay());
   const weekEnd = new Date(weekStart);
-  weekEnd.setDate(weekStart.getDate() + 6); // 이번 주 토요일
-  weekEnd.setHours(23, 59, 59, 999);
+  weekEnd.setDate(weekStart.getDate() + 6);
 
-  let count = 0;
-  for (const key in eventsByDate.value) {
-    const event = eventsByDate.value[key];
-    if (!event.date) continue;
-    const eventDate = new Date(event.date);
-    eventDate.setHours(0, 0, 0, 0);
-    if (eventDate >= weekStart && eventDate <= weekEnd) {
-      count++;
-    }
-  }
-  return count;
+  return eventsByDate.value.filter((e) => {
+    const eventDate = new Date(e.date);
+    return eventDate >= weekStart && eventDate <= weekEnd;
+  }).length;
 });
 
-// 이번 달 일정 수 (행사 건수)
+// 이번 달 일정 수
 const monthScheduleCount = computed(() => {
   const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
   const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  monthEnd.setHours(23, 59, 59, 999);
 
-  let count = 0;
-  for (const key in eventsByDate.value) {
-    const event = eventsByDate.value[key];
-    if (!event.date) continue;
-    const eventDate = new Date(event.date);
-    eventDate.setHours(0, 0, 0, 0);
-    if (eventDate >= monthStart && eventDate <= monthEnd) {
-      count++;
-    }
-  }
-  return count;
+  return eventsByDate.value.filter((e) => {
+    const eventDate = new Date(e.date);
+    return eventDate >= monthStart && eventDate <= monthEnd;
+  }).length;
 });
 </script>
-

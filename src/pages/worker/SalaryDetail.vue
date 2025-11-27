@@ -1,3 +1,24 @@
+<!--
+  ╔══════════════════════════════════════════════════════════════════════╗
+  ║ 페이지: SalaryDetail.vue                                             ║
+  ╠══════════════════════════════════════════════════════════════════════╣
+  ║ 타입: 페이지 (Page)                                                  ║
+  ║                                                                      ║
+  ║ 주요 기능:                                                           ║
+  ║ - 워커(기사) 급여 상세 페이지                                        ║
+  ║ - 급여 내역 조회 (일별, 주별, 월별 필터)                             ║
+  ║ - 급여 계산 (시급 × 근무시간)                                        ║
+  ║ - 지급 완료 내역 및 지급 예정 내역 표시                              ║
+  ║                                                                      ║
+  ║ 특징:                                                                ║
+  ║ - 기간별 필터링 (일별, 주별, 월별)                                   ║
+  ║ - 행사 시간 + 6시간 = 근무시간 계산                                  ║
+  ║ - 시급 20,000원 기준                                                 ║
+  ║ - JSON 데이터 기반 급여 자동 계산                                    ║
+  ║ - 지급 완료/예정 내역 분리 표시                                      ║
+  ╚══════════════════════════════════════════════════════════════════════╝
+-->
+
 <template>
   <div class="pb-20">
 
@@ -144,10 +165,8 @@
 
 <script setup>
 import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
 import reservationsData from "@/data/reservations_2025_12.json";
 
-const router = useRouter();
 const periodFilter = ref("month"); // 'day', 'week', 'month'
 
 // 시급
@@ -396,10 +415,6 @@ const getWeekNumber = (date) => {
 
 const formatCurrency = (amount) => {
   return amount.toLocaleString("ko-KR");
-};
-
-const goBack = () => {
-  router.back();
 };
 </script>
 
